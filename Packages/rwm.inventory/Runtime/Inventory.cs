@@ -6,7 +6,7 @@ public class Inventory : MonoBehaviour
 {
     [SerializeField]
     [Tooltip("Use this to set how many stacks of items you want to store inside of the inventory")]
-    private uint _maxStackAmount;
+    private uint _maxStackAmount = 0;
     private uint _currentStackAmount = 0;
     [SerializeField]
     [Tooltip("Set to true if you want the inventory to automatically draw. Set to false if you want to implement your own UI for the inventory.")]
@@ -28,6 +28,12 @@ public class Inventory : MonoBehaviour
         _items = new List<GameObject>();
     }
 
+    public void SetMaxStackAmount(uint stackAmount)
+    {
+        if (stackAmount < _currentStackAmount) return;
+        _maxStackAmount = stackAmount;
+    }
+
     public void AddItem(GameObject newItem, uint amount)
     {
         if (newItem.GetComponent<InventoryItem>() == null) return;//if it doesnt have the script then we can't add it as we won't be able to process it
@@ -38,23 +44,20 @@ public class Inventory : MonoBehaviour
             _currentStackAmount++;
             return;
         }
+        // check if it is already in the inventory and if it is add to the stack
         foreach(GameObject item in _items)
         {
-            if(item.GetComponent<InventoryItem>().itemTag == newItem.GetComponent<InventoryItem>().itemTag)
+            InventoryItem script = item.GetComponent<InventoryItem>();
+            if (script.itemTag == newItem.GetComponent<InventoryItem>().itemTag)
             {
-                if(item.GetComponent<InventoryItem>().isStackable) item.GetComponent<InventoryItem>().numberOfItems += amount;
-                if (1 + _currentStackAmount > _maxStackAmount) return;//don't add to the inventory when it's full
-                _items.Add(newItem);
-                _currentStackAmount++;
-                return;
-            }
-            else
-            {
-                if (1 + _currentStackAmount > _maxStackAmount) return;//don't add to the inventory when it's full
-                _items.Add(newItem);
-                _currentStackAmount++;
+                if(script.isStackable && (script.NumberOfItems + amount) < script.maxItemsPerStack) script.NumberOfItems = script.NumberOfItems + amount;
                 return;
             }
         }
+        if (1 + _currentStackAmount > _maxStackAmount) return;//don't add to the inventory when it's full
+        newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
+        _items.Add(newItem);
+        _currentStackAmount++;
+        return;
     }
 }
