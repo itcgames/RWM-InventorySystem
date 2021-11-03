@@ -12,13 +12,10 @@ public class InventoryItem : MonoBehaviour
     public uint maxItemsPerStack = 1;
     public bool isStackable = true;
     public uint NumberOfItems { get => numberOfItems; set => numberOfItems = value; }
-<<<<<<< HEAD
 
     // Start is called before the first frame update
     void Start()
     {
         
     }
-=======
->>>>>>> 195a0de (working on tests)
 }
