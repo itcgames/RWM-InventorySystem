@@ -7,7 +7,6 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     [Tooltip("Use this to set how many stacks of items you want to store inside of the inventory")]
     private uint _maxStackAmount = 0;
-    private uint _currentStackAmount = 0;
     [SerializeField]
     [Tooltip("Set to true if you want the inventory to automatically draw. Set to false if you want to implement your own UI for the inventory.")]
     private bool _useDefaultDisplay;
@@ -22,15 +21,14 @@ public class Inventory : MonoBehaviour
     [HideInInspector]
     public List<GameObject> Items { get => _items;}
 
-    // Start is called before the first frame update
-    void Start()
-    {
-        _items = new List<GameObject>();
-    }
+
 
     public void SetMaxStackAmount(uint stackAmount)
     {
-        if (stackAmount < _currentStackAmount) return;
+        if(_items != null)
+        {
+            if (stackAmount < _items.Count) return;
+        }
         _maxStackAmount = stackAmount;
     }
 
@@ -40,8 +38,8 @@ public class Inventory : MonoBehaviour
         if(_items == null)//if this is the first item to be put into the inventory
         {
             _items = new List<GameObject>();
+            newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
             _items.Add(newItem);
-            _currentStackAmount++;
             return;
         }
         // check if it is already in the inventory and if it is add to the stack
@@ -54,10 +52,9 @@ public class Inventory : MonoBehaviour
                 return;
             }
         }
-        if (1 + _currentStackAmount > _maxStackAmount) return;//don't add to the inventory when it's full
+        if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         _items.Add(newItem);
-        _currentStackAmount++;
         return;
     }
 }
