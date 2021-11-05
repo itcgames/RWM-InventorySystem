@@ -80,9 +80,9 @@ namespace Tests
         {
             GameObject item = new GameObject();
             InventoryItem script = item.AddComponent<InventoryItem>();
-            script.maxItemsPerStack = maxItemsPerStack;
-            script.isStackable = isStackable;
-            script.itemTag = itemName;
+            script.MaxItemsPerStack = maxItemsPerStack;
+            script.IsStackable = isStackable;
+            script.Name = itemName;
             return item;
         }
     }

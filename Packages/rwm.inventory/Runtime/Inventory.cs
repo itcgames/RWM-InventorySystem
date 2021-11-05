@@ -42,7 +42,7 @@ public class Inventory : MonoBehaviour
         // check if it is already in the inventory and if it is add to the stack
         _items.ForEach( item => {
             InventoryItem script = item.GetComponent<InventoryItem>();
-            if (script.itemTag == newItem.GetComponent<InventoryItem>().itemTag)
+            if (script.Name == newItem.GetComponent<InventoryItem>().Name)
             {
                 AddItemToInventory(script, amount);
                 return;
@@ -56,9 +56,9 @@ public class Inventory : MonoBehaviour
         GameObject newStack = new GameObject();
         InventoryItem newScript = newStack.AddComponent<InventoryItem>();
         newScript.NumberOfItems = amount;
-        newScript.isStackable = item.isStackable;
-        newScript.itemTag = item.itemTag;
-        newScript.maxItemsPerStack = item.maxItemsPerStack;
+        newScript.IsStackable = item.IsStackable;
+        newScript.Name = item.Name;
+        newScript.MaxItemsPerStack = item.MaxItemsPerStack;
         return newStack;
     }
 
@@ -78,11 +78,11 @@ public class Inventory : MonoBehaviour
 
     private void AddItemToInventory(InventoryItem item, uint amount)
     {
-        if (item.isStackable && (item.NumberOfItems + amount) <= item.maxItemsPerStack) item.NumberOfItems = item.NumberOfItems + amount;
-        if (item.isStackable && (item.NumberOfItems + amount) > item.maxItemsPerStack && _items.Count < _maxStackAmount)
+        if (item.IsStackable && (item.NumberOfItems + amount) <= item.MaxItemsPerStack) item.NumberOfItems = item.NumberOfItems + amount;
+        if (item.IsStackable && (item.NumberOfItems + amount) > item.MaxItemsPerStack && _items.Count < _maxStackAmount)
         {
-            uint remainingItems = item.maxItemsPerStack - item.NumberOfItems;
-            item.NumberOfItems = item.maxItemsPerStack;
+            uint remainingItems = item.MaxItemsPerStack - item.NumberOfItems;
+            item.NumberOfItems = item.MaxItemsPerStack;
             GameObject newStack = AddNewStackOfItem(item, remainingItems);
             _items.Add(newStack);
         }
