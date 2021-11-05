@@ -17,10 +17,22 @@ public class InventoryItem : MonoBehaviour
     [SerializeField]
     private bool isStackable = true;
     public uint NumberOfItems { get => numberOfItems; set {
-            if (value > maxItemsPerStack) numberOfItems = maxItemsPerStack;
+            if (value > maxItemsPerStack)
+            {
+                numberOfItems = maxItemsPerStack;
+                return;
+            }
             numberOfItems = value;
+            if(!isStackable)
+            {
+                numberOfItems = 1;
+                maxItemsPerStack = 1;
+            }
     } }
     public string Name { get => itemTag; set => itemTag = value; }
-    public uint MaxItemsPerStack { get => maxItemsPerStack; set => maxItemsPerStack = value; }
+    public uint MaxItemsPerStack { get => maxItemsPerStack; set {
+            if (!isStackable) maxItemsPerStack = 1;
+            maxItemsPerStack = value;
+        } }
     public bool IsStackable { get => isStackable; set => isStackable = value; }
 }

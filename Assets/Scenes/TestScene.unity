@@ -197,7 +197,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemTag: potion
-  numberOfItems: 0
+  maxItemsPerStack: 1
   isStackable: 1
 --- !u!4 &1204810336
 Transform:
@@ -243,7 +243,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemTag: Sword
-  numberOfItems: 0
+  maxItemsPerStack: 5
   isStackable: 1
 --- !u!4 &1383226727
 Transform:
@@ -372,7 +372,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   itemTag: shield
-  numberOfItems: 0
+  maxItemsPerStack: 1
   isStackable: 1
 --- !u!4 &1854715218
 Transform:
@@ -434,5 +434,3 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   itemsToAdd:
   - {fileID: 1383226725}
-  - {fileID: 1854715216}
-  - {fileID: 1204810334}

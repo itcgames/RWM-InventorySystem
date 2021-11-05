@@ -11,15 +11,10 @@ public class PlayerScript : MonoBehaviour
     void Start()
     {
         inventory = GetComponentInChildren<Inventory>();
-        foreach(GameObject item in itemsToAdd)
-        {
-            inventory.AddItem(item, 1);
-        }
-
-        foreach(GameObject item in inventory.Items)
-        {
-            Debug.Log(item.GetComponent<InventoryItem>().NumberOfItems);
-        }
+        inventory.AddItem(itemsToAdd[0], 5);
+        inventory.AddItem(itemsToAdd[0], 1);
+        inventory.AddItem(itemsToAdd[0], 7);
+        inventory.Items.ForEach(item => Debug.Log(item.GetComponent<InventoryItem>().NumberOfItems));
     }
 
     // Update is called once per frame

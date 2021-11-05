@@ -39,27 +39,20 @@ public class Inventory : MonoBehaviour
             AddFirstItemToInventory(newItem, amount);
             return;
         }
-        // check if it is already in the inventory and if it is add to the stack
-        _items.ForEach( item => {
-            InventoryItem script = item.GetComponent<InventoryItem>();
-            if (script.Name == newItem.GetComponent<InventoryItem>().Name)
+        if(newItem.GetComponent<InventoryItem>().IsStackable)
+        {
+            // check if it is already in the inventory and if it is add to the stack
+            foreach (GameObject item in _items)
             {
-                AddItemToInventory(script, amount);
-                return;
+                InventoryItem script = item.GetComponent<InventoryItem>();
+                if (script.Name == newItem.GetComponent<InventoryItem>().Name)
+                {
+                    AddItemToInventory(FindLastAddedStackOfItem(script), amount);
+                    return;
+                }
             }
-        });
+        }
         AddNewItemToInventory(newItem, amount);
-    }
-
-    private GameObject AddNewStackOfItem(InventoryItem item, uint amount)
-    {
-        GameObject newStack = new GameObject();
-        InventoryItem newScript = newStack.AddComponent<InventoryItem>();
-        newScript.NumberOfItems = amount;
-        newScript.IsStackable = item.IsStackable;
-        newScript.Name = item.Name;
-        newScript.MaxItemsPerStack = item.MaxItemsPerStack;
-        return newStack;
     }
 
     private void AddFirstItemToInventory(GameObject newItem, uint amount)
@@ -76,15 +69,28 @@ public class Inventory : MonoBehaviour
         _items.Add(newItem);
     }
 
-    private void AddItemToInventory(InventoryItem item, uint amount)
+    private GameObject FindLastAddedStackOfItem(InventoryItem item)
     {
-        if (item.IsStackable && (item.NumberOfItems + amount) <= item.MaxItemsPerStack) item.NumberOfItems = item.NumberOfItems + amount;
-        if (item.IsStackable && (item.NumberOfItems + amount) > item.MaxItemsPerStack && _items.Count < _maxStackAmount)
+        return _items.FindLast(x => x.name == item.name);
+    }
+
+    private void AddItemToInventory(GameObject item, uint amount)
+    {
+        InventoryItem script = item.GetComponent<InventoryItem>();
+        if ((script.NumberOfItems + amount) <= script.MaxItemsPerStack)
         {
-            uint remainingItems = item.MaxItemsPerStack - item.NumberOfItems;
-            item.NumberOfItems = item.MaxItemsPerStack;
-            GameObject newStack = AddNewStackOfItem(item, remainingItems);
-            _items.Add(newStack);
+            script.NumberOfItems = script.NumberOfItems + amount;
+            _items[_items.Count - 1].GetComponent<InventoryItem>().NumberOfItems = script.NumberOfItems;
+            return;
+        }
+        else if ((script.NumberOfItems + amount) > script.MaxItemsPerStack && _items.Count < _maxStackAmount)
+        {
+            uint remainingItems = amount - script.NumberOfItems;
+            script.NumberOfItems = script.MaxItemsPerStack;
+            remainingItems++;  
+            _items[_items.Count - 1].GetComponent<InventoryItem>().NumberOfItems = script.NumberOfItems;
+            AddNewItemToInventory(item, remainingItems);
+            return;
         }
     }
 }
