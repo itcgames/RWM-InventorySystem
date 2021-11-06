@@ -87,9 +87,11 @@ namespace Tests
             Inventory inventory = new Inventory();
             inventory.SetMaxStackAmount(3);
             GameObject item = CreateItem(5, true, "item");
+            GameObject item2 = CreateItem(5, true, "item");
+            GameObject item3 = CreateItem(5, true, "item");
             inventory.AddItem(item, 5);
-            inventory.AddItem(item, 1);
-            inventory.AddItem(item, 7);
+            inventory.AddItem(item2, 1);
+            inventory.AddItem(item3, 7);
             yield return new WaitForSeconds(0.1f);
             Assert.AreEqual(inventory.Items.Count, 3);
             Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 5);
@@ -109,6 +111,21 @@ namespace Tests
             yield return new WaitForSeconds(0.1f);
             Assert.AreEqual(inventory.Items.Count, 1);
             Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 5);
+        }
+
+        [UnityTest]
+        public IEnumerator AddingMultipleNonStackableCreatesExtraStacks()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(2);
+            GameObject item = CreateItem(1, false, "item");
+            inventory.AddItem(item, 1);
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 2);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 1);
+            Assert.AreEqual(inventory.Items[1].GetComponent<InventoryItem>().NumberOfItems, 1);
         }
 
         [UnityTest]
@@ -139,6 +156,33 @@ namespace Tests
         }
         #endregion
 
+        #region item test
+        [UnityTest]
+        public IEnumerator NonStackablesOnlyHaveMaxOfOne()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, false, "item");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 1);
+        }
+
+        [UnityTest]
+        public IEnumerator AddingToNonStackableFullInventoryDoesNothing()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(1, false, "item");
+            inventory.AddItem(item, 1);
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 1);
+        }
+        #endregion
+
         #region helper functions
         private GameObject CreateItem(uint maxItemsPerStack, bool isStackable, string itemName)
         {
@@ -147,6 +191,7 @@ namespace Tests
             script.MaxItemsPerStack = maxItemsPerStack;
             script.IsStackable = isStackable;
             script.Name = itemName;
+            script.NumberOfItems = 0;
             return item;
         }
         #endregion

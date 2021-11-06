@@ -23,16 +23,21 @@ public class InventoryItem : MonoBehaviour
                 return;
             }
             numberOfItems = value;
-            if(!isStackable)
+            if (!isStackable)
             {
                 numberOfItems = 1;
                 maxItemsPerStack = 1;
             }
-    } }
+        } }
     public string Name { get => itemTag; set => itemTag = value; }
     public uint MaxItemsPerStack { get => maxItemsPerStack; set {
             if (!isStackable) maxItemsPerStack = 1;
             maxItemsPerStack = value;
         } }
     public bool IsStackable { get => isStackable; set => isStackable = value; }
+
+    public void SetToMaxStackAmount()
+    {
+        numberOfItems = maxItemsPerStack;
+    }
 }
