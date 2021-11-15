@@ -14,11 +14,13 @@ public class Inventory : MonoBehaviour
     [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
     private Font _font;
     private List<GameObject> _items;
+    private List<GameObject> _usedItems;
     private uint _activeItemIndex;
     private bool _isOpen;
     private const string _notSetString = "not set";
     private string _openCommand = _notSetString;
     private string _closeCommand = _notSetString;
+    private string _submitCommand = _notSetString;
 
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
@@ -26,12 +28,22 @@ public class Inventory : MonoBehaviour
     [HideInInspector]
     public List<GameObject> Items { get => _items; }
 
+    [HideInInspector]
     public GameObject ActiveItem { get {
             if (_items == null || _activeItemIndex > _items.Count) return null;
             return _items[(int)_activeItemIndex];
     }}
 
     public bool IsOpen { get => _isOpen; set => _isOpen = value; }
+
+    [HideInInspector]
+    public string OpenCommand { get => _openCommand; set => _openCommand = value; }
+
+    [HideInInspector]
+    public string CloseCommand { get => _closeCommand; set => _closeCommand = value; }
+
+    [HideInInspector]
+    public string SubmitCommand { get => _submitCommand; set => _submitCommand = value; }
 
     public void SetMaxStackAmount(uint stackAmount)
     {
@@ -62,6 +74,22 @@ public class Inventory : MonoBehaviour
             }
         }
         AddNewItemToInventory(newItem, amount);
+    }
+
+    public void UseItem(string submitCommand)
+    {
+        if(Input.GetButtonDown(submitCommand) && _isOpen)
+        {
+            if (_items[(int)_activeItemIndex] == null) return;
+            _usedItems.Add(_items[(int)_activeItemIndex]);
+            InventoryItem item = _items[(int)_activeItemIndex].GetComponent<InventoryItem>();
+            item.NumberOfItems--;
+            if(item.NumberOfItems <= 0)
+            {
+                _items.Remove(_items[(int)_activeItemIndex]);
+                if (_items.Count < _activeItemIndex && _items.Count > 0) _activeItemIndex--;
+            }
+        }
     }
 
     public void OpenInventory(string openCommand)
