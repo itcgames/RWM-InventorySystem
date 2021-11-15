@@ -14,12 +14,24 @@ public class Inventory : MonoBehaviour
     [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
     private Font _font;
     private List<GameObject> _items;
+    private uint _activeItemIndex;
+    private bool _isOpen;
+    private const string _notSetString = "not set";
+    private string _openCommand = _notSetString;
+    private string _closeCommand = _notSetString;
 
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
     [HideInInspector]
     public List<GameObject> Items { get => _items; }
+
+    public GameObject ActiveItem { get {
+            if (_items == null || _activeItemIndex > _items.Count) return null;
+            return _items[(int)_activeItemIndex];
+    }}
+
+    public bool IsOpen { get => _isOpen; set => _isOpen = value; }
 
     public void SetMaxStackAmount(uint stackAmount)
     {
@@ -50,6 +62,42 @@ public class Inventory : MonoBehaviour
             }
         }
         AddNewItemToInventory(newItem, amount);
+    }
+
+    public void OpenInventory(string openCommand)
+    {
+        if(Input.GetButtonDown(openCommand))
+        {
+            _isOpen = true;
+        }
+    }
+
+    public void OpenInventory()
+    {
+        if (_openCommand == _notSetString) return;
+
+        if(Input.GetButtonDown(_openCommand))
+        {
+            _isOpen = true;
+        }
+    }
+
+    public void CloseInventory(string closeCommand)
+    {
+        if(Input.GetButtonDown(closeCommand))
+        {
+            _isOpen = false;
+        }
+    }
+
+    public void CloseInventory()
+    {
+        if (_closeCommand == _notSetString) return;
+
+        if(Input.GetButtonDown(_closeCommand))
+        {
+            _isOpen = false;
+        }
     }
 
     private void AddFirstItemToInventory(GameObject newItem, uint amount)
