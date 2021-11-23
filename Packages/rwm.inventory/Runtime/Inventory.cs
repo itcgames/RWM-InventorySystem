@@ -92,6 +92,24 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public void UseItem()
+    {
+        if (_submitCommand == _notSetString) return;
+
+        if (Input.GetButtonDown(_submitCommand) && _isOpen)
+        {
+            if (_items[(int)_activeItemIndex] == null) return;
+            _usedItems.Add(_items[(int)_activeItemIndex]);
+            InventoryItem item = _items[(int)_activeItemIndex].GetComponent<InventoryItem>();
+            item.NumberOfItems--;
+            if (item.NumberOfItems <= 0)
+            {
+                _items.Remove(_items[(int)_activeItemIndex]);
+                if (_items.Count < _activeItemIndex && _items.Count > 0) _activeItemIndex--;
+            }
+        }
+    }
+
     public void OpenInventory(string openCommand)
     {
         if(Input.GetButtonDown(openCommand))
@@ -126,6 +144,21 @@ public class Inventory : MonoBehaviour
         {
             _isOpen = false;
         }
+    }
+
+    void SetSubmitCommand(string submitCommand)
+    {
+        _submitCommand = submitCommand;
+    }
+
+    void SetOpenCommand(string openCommand)
+    {
+        _openCommand = openCommand;
+    }
+
+    void SetCloseCommand(string closeCommand)
+    {
+        _closeCommand = closeCommand;
     }
 
     private void AddFirstItemToInventory(GameObject newItem, uint amount)
