@@ -29,6 +29,9 @@ public class Inventory : MonoBehaviour
     public List<GameObject> Items { get => _items; }
 
     [HideInInspector]
+    public List<GameObject> UsedItems { get => _usedItems;}
+
+    [HideInInspector]
     public GameObject ActiveItem { get {
             if (_items == null || _activeItemIndex > _items.Count) return null;
             return _items[(int)_activeItemIndex];
@@ -52,6 +55,11 @@ public class Inventory : MonoBehaviour
             if (stackAmount < _items.Count) return;
         }
         _maxStackAmount = stackAmount;
+    }
+
+    private void Start()
+    {
+        _usedItems = new List<GameObject>();
     }
 
 
@@ -81,8 +89,17 @@ public class Inventory : MonoBehaviour
         if(Input.GetButtonDown(submitCommand) && _isOpen)
         {
             if (_items[(int)_activeItemIndex] == null) return;
-            _usedItems.Add(_items[(int)_activeItemIndex]);
             InventoryItem item = _items[(int)_activeItemIndex].GetComponent<InventoryItem>();
+
+            if (item.useFunction != null)
+            {
+                item.useFunction();
+            }
+            else
+            {
+                if(_usedItems == null) _usedItems = new List<GameObject>();
+                _usedItems.Add(_items[(int)_activeItemIndex]);
+            }
             item.NumberOfItems--;
             if(item.NumberOfItems <= 0)
             {
@@ -94,18 +111,27 @@ public class Inventory : MonoBehaviour
 
     public void UseItem()
     {
-        if (_submitCommand == _notSetString) return;
-
-        if (Input.GetButtonDown(_submitCommand) && _isOpen)
+        if (_isOpen)
         {
             if (_items[(int)_activeItemIndex] == null) return;
-            _usedItems.Add(_items[(int)_activeItemIndex]);
             InventoryItem item = _items[(int)_activeItemIndex].GetComponent<InventoryItem>();
+
+            if(item.useFunction != null)
+            {
+                Debug.Log("has function");
+                item.useFunction();
+            }
+            else
+            {
+                if (_usedItems == null) _usedItems = new List<GameObject>();
+                _usedItems.Add(_items[(int)_activeItemIndex]);
+            }
             item.NumberOfItems--;
             if (item.NumberOfItems <= 0)
             {
                 _items.Remove(_items[(int)_activeItemIndex]);
-                if (_items.Count < _activeItemIndex && _items.Count > 0) _activeItemIndex--;
+                if (_items.Count - 1 < _activeItemIndex && _items.Count > 0) _activeItemIndex--;
+                Debug.Log("Removing used item from inventory");
             }
         }
     }
@@ -120,12 +146,8 @@ public class Inventory : MonoBehaviour
 
     public void OpenInventory()
     {
-        if (_openCommand == _notSetString) return;
-
-        if(Input.GetButtonDown(_openCommand))
-        {
-            _isOpen = true;
-        }
+        _isOpen = true;
+        Debug.Log("Inventory Opened");
     }
 
     public void CloseInventory(string closeCommand)
@@ -138,13 +160,11 @@ public class Inventory : MonoBehaviour
 
     public void CloseInventory()
     {
-        if (_closeCommand == _notSetString) return;
-
-        if(Input.GetButtonDown(_closeCommand))
-        {
-            _isOpen = false;
-        }
+        _isOpen = false;
+        Debug.Log("Inventory Opened");
     }
+
+    
 
     void SetSubmitCommand(string submitCommand)
     {
@@ -166,6 +186,7 @@ public class Inventory : MonoBehaviour
         _items = new List<GameObject>();
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         _items.Add(newItem);
+        _activeItemIndex = 0;
     }
 
     private void AddNewItemToInventory(GameObject newItem, uint amount)
@@ -173,6 +194,7 @@ public class Inventory : MonoBehaviour
         if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         _items.Add(newItem);
+        _activeItemIndex = (uint)_items.Count - 1;
     }
 
     private GameObject FindLastAddedStackOfItem(InventoryItem item)

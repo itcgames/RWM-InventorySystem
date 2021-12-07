@@ -16,6 +16,10 @@ public class InventoryItem : MonoBehaviour
         " Updating number of items without setting this to true won't affect the inventory.")]
     [SerializeField]
     private bool isStackable = true;
+
+    public delegate void Use();
+    public Use useFunction;
+
     public uint NumberOfItems { get => numberOfItems; set {
             if (value > maxItemsPerStack)
             {
