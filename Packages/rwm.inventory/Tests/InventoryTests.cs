@@ -192,11 +192,26 @@ namespace Tests
             yield return new WaitForSeconds(0.1f);
             GameObject item = CreateItem(5, true, "item");
             inventory.AddItem(item, 1);
+            inventory.OpenInventory();
             inventory.UseItem();
             yield return new WaitForSeconds(0.1f);
             Assert.IsNotNull(inventory.UsedItems);
             Assert.AreEqual(1, inventory.UsedItems.Count);
             Assert.AreEqual(0, inventory.Items.Count);//remove item from inventory after it is used
+        }
+
+        [UnityTest]
+        public IEnumerator DontUseItemWhenClosed()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            inventory.UseItem();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.UsedItems);
+            Assert.AreEqual(1, inventory.Items.Count);//remove item from inventory after it is used
         }
         #endregion
 
