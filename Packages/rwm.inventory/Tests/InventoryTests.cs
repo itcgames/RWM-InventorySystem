@@ -211,7 +211,23 @@ namespace Tests
             inventory.UseItem();
             yield return new WaitForSeconds(0.1f);
             Assert.IsNull(inventory.UsedItems);
-            Assert.AreEqual(1, inventory.Items.Count);//remove item from inventory after it is used
+            Assert.AreEqual(1, inventory.Items.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator UseFunctionIfAble()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            GameObject item = CreateItem(5, true, "item");
+            item.GetComponent<InventoryItem>().useFunction += UseItem;
+            inventory.AddItem(item, 1);
+            inventory.OpenInventory();
+            inventory.UseItem();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.UsedItems);
+            Assert.AreEqual(0, inventory.Items.Count);
         }
         #endregion
 
@@ -225,6 +241,11 @@ namespace Tests
             script.Name = itemName;
             script.NumberOfItems = 0;
             return item;
+        }
+
+        public void UseItem()
+        {
+            Debug.Log("using an item in the tests");
         }
         #endregion
     }
