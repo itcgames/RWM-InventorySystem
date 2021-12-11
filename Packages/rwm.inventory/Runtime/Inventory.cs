@@ -22,6 +22,7 @@ public class Inventory : MonoBehaviour
     private string _submitCommand = _notSetString;
     private int _currentlySelectedIndex = 0;
 
+    public int maxItemsPerRow = 0;
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -165,7 +166,49 @@ public class Inventory : MonoBehaviour
         Debug.Log("Inventory Opened");
     }
 
-    
+    public void GoToNextItem()
+    {
+        if(_isOpen)
+        {
+            if(_items.Count > _currentlySelectedIndex + 1)
+            {
+                _currentlySelectedIndex++;
+            }
+        }
+    }
+
+    public void GoToPreviousItem()
+    {
+        if(_isOpen)
+        {
+            if(_currentlySelectedIndex > 0)
+            {
+                _currentlySelectedIndex--;
+            }
+        }
+    }
+
+    public void GoToItemBelow()
+    {
+        if(_isOpen && maxItemsPerRow > 0)
+        {
+            if(_items.Count > _currentlySelectedIndex + maxItemsPerRow)
+            {
+                _currentlySelectedIndex += maxItemsPerRow;
+            }
+        }
+    }
+
+    public void GoToItemAbove()
+    {
+        if(_isOpen && _currentlySelectedIndex >= maxItemsPerRow)
+        {
+            if(_currentlySelectedIndex - maxItemsPerRow >= 0)
+            {
+                _currentlySelectedIndex -= maxItemsPerRow;
+            }
+        }
+    }
 
     void SetSubmitCommand(string submitCommand)
     {
