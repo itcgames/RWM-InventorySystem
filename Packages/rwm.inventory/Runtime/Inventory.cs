@@ -20,6 +20,10 @@ public class Inventory : MonoBehaviour
     private string _openCommand = _notSetString;
     private string _closeCommand = _notSetString;
     private string _submitCommand = _notSetString;
+    private string _goToNextCommand = _notSetString;
+    private string _goToAboveCommand = _notSetString;
+    private string _goToBelowCommand = _notSetString;
+    private string _goToPreviousCommand = _notSetString;
     private int _currentlySelectedIndex = 0;
 
     public int maxItemsPerRow = 0;
@@ -210,6 +214,38 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    public void GoToNextItem(string goToNextCommand)
+    {
+        if(Input.GetButtonDown(goToNextCommand))
+        {
+            GoToNextItem();
+        }
+    }
+
+    public void GoToPreviousItem(string goToPreviousCommand)
+    {
+        if(Input.GetButtonDown(goToPreviousCommand))
+        {
+            GoToPreviousItem();
+        }
+    }
+
+    public void GoToItemBelow(string goToBelowCommand)
+    {
+        if(Input.GetButtonDown(goToBelowCommand))
+        {
+            GoToItemBelow();
+        }
+    }
+
+    public void GoToItemAbove(string goToAboveCommand)
+    {
+        if(Input.GetButtonDown(goToAboveCommand))
+        {
+            GoToItemAbove();
+        }
+    }
+
     void SetSubmitCommand(string submitCommand)
     {
         _submitCommand = submitCommand;
@@ -223,6 +259,26 @@ public class Inventory : MonoBehaviour
     void SetCloseCommand(string closeCommand)
     {
         _closeCommand = closeCommand;
+    }
+
+    void SetGoToPreviousCommand(string previousCommand)
+    {
+        _goToPreviousCommand = previousCommand;
+    }
+
+    void SetGoToAboveCommand(string aboveCommand)
+    {
+        _goToAboveCommand = aboveCommand;
+    }
+
+    void SetGoToNextCommand(string nextCommand)
+    {
+        _goToNextCommand = nextCommand;
+    }
+
+    void SetGoToBelowCommand(string belowCommand)
+    {
+        _goToBelowCommand = belowCommand;
     }
 
     private void AddFirstItemToInventory(GameObject newItem, uint amount)
