@@ -24,7 +24,7 @@ public class Inventory : MonoBehaviour
     private string _goToAboveCommand = _notSetString;
     private string _goToBelowCommand = _notSetString;
     private string _goToPreviousCommand = _notSetString;
-    private int _currentlySelectedIndex = 0;
+    private int _currentlySelectedIndex = -1;
 
     public int maxItemsPerRow = 0;
     [HideInInspector]
@@ -47,6 +47,8 @@ public class Inventory : MonoBehaviour
     [HideInInspector]
     public string SubmitCommand { get => _submitCommand; set => _submitCommand = value; }
 
+    [HideInInspector]
+    public int ActiveItemIndex { get => _currentlySelectedIndex;}
 
     public void SetMaxStackAmount(uint stackAmount)
     {
@@ -66,7 +68,7 @@ public class Inventory : MonoBehaviour
     {
         if(_isOpen)
         {
-            if(_items != null && _currentlySelectedIndex > 0 && _currentlySelectedIndex < _items.Count)
+            if(_items != null && _currentlySelectedIndex >= 0 && _currentlySelectedIndex < _items.Count)
             {
                 return _items[_currentlySelectedIndex];
             }
@@ -78,7 +80,7 @@ public class Inventory : MonoBehaviour
     {
         if (!_isOpen)
         {
-            if (_items != null && _currentlySelectedIndex > 0 && _currentlySelectedIndex < _items.Count)
+            if (_items != null && _currentlySelectedIndex >= 0 && _currentlySelectedIndex < _items.Count)
             {
                 return _items[_currentlySelectedIndex];
             }
@@ -119,6 +121,8 @@ public class Inventory : MonoBehaviour
     {
         if (_isOpen)
         {
+            if (_items == null) return;
+            if (_items.Count == 0) return;
             if (_items[_currentlySelectedIndex] == null) return;
             InventoryItem item = _items[_currentlySelectedIndex].GetComponent<InventoryItem>();
 
@@ -137,6 +141,7 @@ public class Inventory : MonoBehaviour
             {
                 _items.Remove(_items[_currentlySelectedIndex]);
                 if (_items.Count - 1 < _currentlySelectedIndex && _items.Count > 0) _currentlySelectedIndex--;
+                if (_items.Count == 0) _currentlySelectedIndex = -1;
                 Debug.Log("Removing used item from inventory");
             }
         }
@@ -294,6 +299,11 @@ public class Inventory : MonoBehaviour
         if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         _items.Add(newItem);
+
+        if(_currentlySelectedIndex == -1)
+        {
+            _currentlySelectedIndex = 0;
+        }
     }
 
     private GameObject FindLastAddedStackOfItem(InventoryItem item)

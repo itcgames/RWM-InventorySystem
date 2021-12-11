@@ -201,6 +201,36 @@ namespace Tests
         }
 
         [UnityTest]
+        public IEnumerator NoItemsUsedWhenInventoryIsNull()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            inventory.OpenInventory();
+            inventory.UseItem();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.UsedItems);
+            Assert.IsNull(inventory.Items);//remove item from inventory after it is used
+        }
+
+        [UnityTest]
+        public IEnumerator NoItemsUsedWhenInventoryEmpty()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            inventory.OpenInventory();
+            inventory.UseItem();
+            inventory.UseItem();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNotNull(inventory.UsedItems);
+            Assert.AreEqual(1, inventory.UsedItems.Count);
+            Assert.AreEqual(0, inventory.Items.Count);//remove item from inventory after it is used
+        }
+
+        [UnityTest]
         public IEnumerator DontUseItemWhenClosed()
         {
             Inventory inventory = new Inventory();
@@ -228,6 +258,35 @@ namespace Tests
             yield return new WaitForSeconds(0.1f);
             Assert.IsNull(inventory.UsedItems);
             Assert.AreEqual(0, inventory.Items.Count);
+        }
+        #endregion
+
+        #region Updating Active Item
+        [UnityTest]
+        public IEnumerator ActiveItemSetWhenInventoryHasItem()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            inventory.OpenInventory();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNotNull(inventory.Items);
+            Assert.AreEqual(1, inventory.Items.Count);
+            Assert.AreEqual(0, inventory.ActiveItemIndex);
+        }
+
+        [UnityTest]
+        public IEnumerator ActiveItemIndexStaysNegativeWhenNoItems()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            inventory.OpenInventory();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.Items);
+            Assert.AreEqual(-1, inventory.ActiveItemIndex);
         }
         #endregion
 
