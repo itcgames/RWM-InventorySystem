@@ -14,12 +14,41 @@ public class Inventory : MonoBehaviour
     [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
     private Font _font;
     private List<GameObject> _items;
+    private List<GameObject> _usedItems;
+    private bool _isOpen;
+    private const string _notSetString = "not set";
+    private string _openCommand = _notSetString;
+    private string _closeCommand = _notSetString;
+    private string _submitCommand = _notSetString;
+    private string _goToNextCommand = _notSetString;
+    private string _goToAboveCommand = _notSetString;
+    private string _goToBelowCommand = _notSetString;
+    private string _goToPreviousCommand = _notSetString;
+    private int _currentlySelectedIndex = -1;
 
+    public int maxItemsPerRow = 0;
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
     [HideInInspector]
     public List<GameObject> Items { get => _items; }
+
+    [HideInInspector]
+    public List<GameObject> UsedItems { get => _usedItems;}
+
+    public bool IsOpen { get => _isOpen; set => _isOpen = value; }
+
+    [HideInInspector]
+    public string OpenCommand { get => _openCommand; set => _openCommand = value; }
+
+    [HideInInspector]
+    public string CloseCommand { get => _closeCommand; set => _closeCommand = value; }
+
+    [HideInInspector]
+    public string SubmitCommand { get => _submitCommand; set => _submitCommand = value; }
+
+    [HideInInspector]
+    public int ActiveItemIndex { get => _currentlySelectedIndex;}
 
     public void SetMaxStackAmount(uint stackAmount)
     {
@@ -30,6 +59,34 @@ public class Inventory : MonoBehaviour
         _maxStackAmount = stackAmount;
     }
 
+    private void Start()
+    {
+        _usedItems = new List<GameObject>();
+    }
+
+    public GameObject GetCurrentlySelectedObject()
+    {
+        if(_isOpen)
+        {
+            if(_items != null && _currentlySelectedIndex >= 0 && _currentlySelectedIndex < _items.Count)
+            {
+                return _items[_currentlySelectedIndex];
+            }
+        }
+        return null;
+    }
+
+    public GameObject GetCurrentlySelectedObjectWhenClosed()
+    {
+        if (!_isOpen)
+        {
+            if (_items != null && _currentlySelectedIndex >= 0 && _currentlySelectedIndex < _items.Count)
+            {
+                return _items[_currentlySelectedIndex];
+            }
+        }
+        return null;
+    }
 
     public void AddItem(GameObject newItem, uint amount)
     {
@@ -45,18 +102,246 @@ public class Inventory : MonoBehaviour
             GameObject lastItem = FindLastAddedStackOfItem(newItem.GetComponent<InventoryItem>());
             if (lastItem != null)
             {
-                AddItemToInventory(lastItem, newItem, amount);
+                AddUntilNoItemsLeft(lastItem, (int)amount);
                 return;
             }
         }
         AddNewItemToInventory(newItem, amount);
     }
 
+    public void UseItem(string submitCommand)
+    {
+        if(Input.GetButtonDown(submitCommand) && _isOpen)
+        {
+            UseItem();
+        }
+    }
+
+    public void UseItem()
+    {
+        if (_isOpen)
+        {
+            if (_items == null) return;
+            if (_items.Count == 0) return;
+            if (_items[_currentlySelectedIndex] == null) return;
+            InventoryItem item = _items[_currentlySelectedIndex].GetComponent<InventoryItem>();
+
+            if(item.useFunction != null)
+            {
+                Debug.Log("has function");
+                item.useFunction();
+            }
+            else
+            {
+                if (_usedItems == null) _usedItems = new List<GameObject>();
+                _usedItems.Add(_items[_currentlySelectedIndex]);
+            }
+            item.NumberOfItems--;
+            if (item.NumberOfItems <= 0)
+            {
+                _items.Remove(_items[_currentlySelectedIndex]);
+                if (_items.Count - 1 < _currentlySelectedIndex && _items.Count > 0) _currentlySelectedIndex--;
+                if (_items.Count == 0) _currentlySelectedIndex = -1;
+                Debug.Log("Removing used item from inventory");
+            }
+        }
+    }
+
+    public void OpenInventory(string openCommand)
+    {
+        if(Input.GetButtonDown(openCommand))
+        {
+            _isOpen = true;
+        }
+    }
+
+    public void OpenInventory()
+    {
+        _isOpen = true;
+        Debug.Log("Inventory Opened");
+    }
+
+    public void CloseInventory(string closeCommand)
+    {
+        if(Input.GetButtonDown(closeCommand))
+        {
+            _isOpen = false;
+        }
+    }
+
+    public void CloseInventory()
+    {
+        _isOpen = false;
+        Debug.Log("Inventory Opened");
+    }
+
+    public void GoToNextItem()
+    {
+        if(_isOpen)
+        {
+            if(_items.Count > _currentlySelectedIndex + 1)
+            {
+                _currentlySelectedIndex++;
+            }
+        }
+    }
+
+    public void GoToPreviousItem()
+    {
+        if(_isOpen)
+        {
+            if(_currentlySelectedIndex > 0)
+            {
+                _currentlySelectedIndex--;
+            }
+        }
+    }
+
+    public void GoToItemBelow()
+    {
+        if(_isOpen && maxItemsPerRow > 0)
+        {
+            if (_currentlySelectedIndex == -1) _currentlySelectedIndex++;
+            if(_items.Count > _currentlySelectedIndex + maxItemsPerRow)
+            {
+                _currentlySelectedIndex += maxItemsPerRow;
+            }
+        }
+    }
+
+    public void GoToItemAbove()
+    {
+        if(_isOpen && _currentlySelectedIndex >= maxItemsPerRow)
+        {
+            if(_currentlySelectedIndex - maxItemsPerRow >= 0)
+            {
+                _currentlySelectedIndex -= maxItemsPerRow;
+            }
+        }
+    }
+
+    public void GoToNextItem(string goToNextCommand)
+    {
+        if(Input.GetButtonDown(goToNextCommand))
+        {
+            GoToNextItem();
+        }
+    }
+
+    public void GoToPreviousItem(string goToPreviousCommand)
+    {
+        if(Input.GetButtonDown(goToPreviousCommand))
+        {
+            GoToPreviousItem();
+        }
+    }
+
+    public void GoToItemBelow(string goToBelowCommand)
+    {
+        if(Input.GetButtonDown(goToBelowCommand))
+        {
+            GoToItemBelow();
+        }
+    }
+
+    public void GoToItemAbove(string goToAboveCommand)
+    {
+        if(Input.GetButtonDown(goToAboveCommand))
+        {
+            GoToItemAbove();
+        }
+    }
+
+    void SetSubmitCommand(string submitCommand)
+    {
+        _submitCommand = submitCommand;
+    }
+
+    void SetOpenCommand(string openCommand)
+    {
+        _openCommand = openCommand;
+    }
+
+    void SetCloseCommand(string closeCommand)
+    {
+        _closeCommand = closeCommand;
+    }
+
+    void SetGoToPreviousCommand(string previousCommand)
+    {
+        _goToPreviousCommand = previousCommand;
+    }
+
+    void SetGoToAboveCommand(string aboveCommand)
+    {
+        _goToAboveCommand = aboveCommand;
+    }
+
+    void SetGoToNextCommand(string nextCommand)
+    {
+        _goToNextCommand = nextCommand;
+    }
+
+    void SetGoToBelowCommand(string belowCommand)
+    {
+        _goToBelowCommand = belowCommand;
+    }
+
     private void AddFirstItemToInventory(GameObject newItem, uint amount)
     {
         _items = new List<GameObject>();
-        newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
-        _items.Add(newItem);
+        InventoryItem script = newItem.GetComponent<InventoryItem>();
+        if ((script.NumberOfItems + amount) <= script.MaxItemsPerStack)
+        {
+            script.NumberOfItems = script.NumberOfItems + amount;
+            _items.Add(newItem);
+            _currentlySelectedIndex = 0;
+            return;
+        }
+        else if ((script.NumberOfItems + amount) > script.MaxItemsPerStack && _items.Count < _maxStackAmount)
+        {
+            uint remainingItems = amount - (script.MaxItemsPerStack - script.NumberOfItems);
+            script.NumberOfItems = script.MaxItemsPerStack;
+            _items.Add(newItem);
+            //GameObject newobj = Instantiate(newItem);
+            AddUntilNoItemsLeft(newItem, (int)remainingItems);
+            return;
+        }        
+    }
+
+    private void AddUntilNoItemsLeft(GameObject itemType, int amountOfItems)
+    {
+        InventoryItem script = itemType.GetComponent<InventoryItem>();
+
+        if ((script.NumberOfItems + amountOfItems) <= script.MaxItemsPerStack)
+        {
+            script.NumberOfItems = (uint)(script.NumberOfItems + amountOfItems);
+            return;
+        }
+
+        if(script.NumberOfItems < script.MaxItemsPerStack)
+        {
+            amountOfItems = (int)(amountOfItems - (script.MaxItemsPerStack - script.NumberOfItems));
+            script.NumberOfItems = script.MaxItemsPerStack;
+        }
+
+        while (amountOfItems > 0 && _items.Count < _maxStackAmount)
+        {
+            if(amountOfItems > script.MaxItemsPerStack)
+            {
+                amountOfItems -= (int)script.MaxItemsPerStack;
+                GameObject newobj = Instantiate(itemType);
+                newobj.GetComponent<InventoryItem>().NumberOfItems = script.MaxItemsPerStack;
+                _items.Add(newobj);
+            }
+            else
+            {
+                GameObject newobj = Instantiate(itemType);
+                newobj.GetComponent<InventoryItem>().NumberOfItems = (uint)amountOfItems;
+                amountOfItems = 0;
+                _items.Add(newobj);
+            }
+        }
     }
 
     private void AddNewItemToInventory(GameObject newItem, uint amount)
@@ -64,6 +349,11 @@ public class Inventory : MonoBehaviour
         if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         _items.Add(newItem);
+
+        if(_currentlySelectedIndex == -1)
+        {
+            _currentlySelectedIndex = 0;
+        }
     }
 
     private GameObject FindLastAddedStackOfItem(InventoryItem item)
