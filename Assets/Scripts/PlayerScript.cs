@@ -16,11 +16,6 @@ public class PlayerScript : MonoBehaviour
     {
         _health = maxHealth / 2.0f;
         inventory = GetComponentInChildren<Inventory>();
-        //for (int i = 0; i < itemsToAdd.Length; i++)
-        //{
-        //    inventory.AddItem(Instantiate(itemsToAdd[i]), numberOfItemsToAdd[i]);
-        //}
-        //inventory.Items.ForEach(item => Debug.Log(item.GetComponent<InventoryItem>().NumberOfItems));
     }
 
     public void Heal(float amount)

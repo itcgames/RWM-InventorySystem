@@ -35,6 +35,7 @@ public class Inventory : MonoBehaviour
     public int rowOffset = 10;
     public int columnOffset = 10;
     public int maxItemsPerRow = 0;
+    public int maxItemsPerCol = 0;
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -340,6 +341,7 @@ public class Inventory : MonoBehaviour
             script.SetUpDisplay();
             script.SetParentTransform(initialTransform);
             _items.Add(newItem);
+            OnlyDisplayCurrentPage();
             _currentlySelectedIndex = 0;
             return;
         }
@@ -351,6 +353,7 @@ public class Inventory : MonoBehaviour
             script.SetUpDisplay();
             script.SetParentTransform(initialTransform);
             _items.Add(newItem);
+            OnlyDisplayCurrentPage();
             AddUntilNoItemsLeft(newItem, (int)remainingItems);
             return;
         }        
@@ -382,6 +385,7 @@ public class Inventory : MonoBehaviour
                 script.SetUpDisplay();
                 script.SetParentTransform(initialTransform);
                 _items.Add(newobj);
+                OnlyDisplayCurrentPage();
             }
             else
             {
@@ -391,6 +395,7 @@ public class Inventory : MonoBehaviour
                 script.SetUpDisplay();
                 script.SetParentTransform(initialTransform);
                 _items.Add(newobj);
+                OnlyDisplayCurrentPage();
             }
         }
     }
@@ -400,9 +405,14 @@ public class Inventory : MonoBehaviour
         if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         InventoryItem script = newItem.GetComponent<InventoryItem>();
-        _items.Add(newItem);
         script.SetUpDisplay();
         script.SetParentTransform(initialTransform);
+        _items.Add(newItem);
+        if(IsOnCurrentPage(_items.Count - 1))
+        {
+
+        }
+        OnlyDisplayCurrentPage();
         if (!_isOpen)
         {
             _items[_items.Count - 1].SetActive(false);
@@ -417,5 +427,32 @@ public class Inventory : MonoBehaviour
     private GameObject FindLastAddedStackOfItem(InventoryItem item)
     {
         return _items.FindLast(x => x.GetComponent<InventoryItem>().Name == item.Name);
+    }
+
+    private void OnlyDisplayCurrentPage()
+    {
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxItemsPerCol);
+        List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber), maxItemsPerCol * maxItemsPerRow);
+        foreach(GameObject item in currentPage)
+        {
+            item.SetActive(true);
+        }
+
+        for(int i = 0; i < _items.Count; i++)
+        {
+            if(i >= initialPageIndex && i <= lastPageIndex)
+            {
+                continue;
+            }
+            _items[i].SetActive(false);
+        }
+    }
+
+    private bool IsOnCurrentPage(int index)
+    {
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxItemsPerCol);
+        return (index >= initialPageIndex && index <= lastPageIndex);
     }
 }
