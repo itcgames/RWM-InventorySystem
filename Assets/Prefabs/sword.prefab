@@ -46,3 +46,4 @@ MonoBehaviour:
   itemTag: Sword
   maxItemsPerStack: 5
   isStackable: 1
+  _sprite: {fileID: 21300000, guid: 506e4acd3641a9847b6b7267e112b2cf, type: 3}

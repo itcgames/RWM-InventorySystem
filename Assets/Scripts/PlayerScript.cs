@@ -16,11 +16,11 @@ public class PlayerScript : MonoBehaviour
     {
         _health = maxHealth / 2.0f;
         inventory = GetComponentInChildren<Inventory>();
-        for (int i = 0; i < itemsToAdd.Length; i++)
-        {
-            inventory.AddItem(Instantiate(itemsToAdd[i]), numberOfItemsToAdd[i]);
-        }
-        inventory.Items.ForEach(item => Debug.Log(item.GetComponent<InventoryItem>().NumberOfItems));
+        //for (int i = 0; i < itemsToAdd.Length; i++)
+        //{
+        //    inventory.AddItem(Instantiate(itemsToAdd[i]), numberOfItemsToAdd[i]);
+        //}
+        //inventory.Items.ForEach(item => Debug.Log(item.GetComponent<InventoryItem>().NumberOfItems));
     }
 
     public void Heal(float amount)
@@ -74,6 +74,20 @@ public class PlayerScript : MonoBehaviour
         if(collision.tag == "Item")
         {
             GameObject item = Instantiate(collision.gameObject);
+            if(item.GetComponent<SpriteRenderer>() != null)
+            {
+                Destroy(item.GetComponent<SpriteRenderer>());
+            }
+            if(item.GetComponent<Rigidbody2D>() != null)
+            {
+                Destroy(item.GetComponent<Rigidbody2D>());
+            }
+            if (item.GetComponent<BoxCollider2D>() != null)
+            {
+                Destroy(item.GetComponent<BoxCollider2D>());
+            }
+            item.GetComponent<InventoryItem>().canvas = collision.gameObject.GetComponent<InventoryItem>().canvas;
+            //item.AddComponent<InventoryItem>();
             inventory.AddItem(item, 1);
             Destroy(collision.gameObject);
             item.SetActive(false);
