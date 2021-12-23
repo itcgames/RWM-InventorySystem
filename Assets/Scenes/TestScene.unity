@@ -159,8 +159,8 @@ MonoBehaviour:
   totalItemsText: {fileID: 1923825996}
   rowOffset: 10
   columnOffset: 10
-  maxItemsPerRow: 0
-  maxItemsPerCol: 0
+  maxItemsPerRow: 5
+  maxItemsPerCol: 2
 --- !u!4 &627402343
 Transform:
   m_ObjectHideFlags: 0

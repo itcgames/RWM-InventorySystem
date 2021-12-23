@@ -341,6 +341,10 @@ public class Inventory : MonoBehaviour
             script.SetUpDisplay();
             script.SetParentTransform(initialTransform);
             _items.Add(newItem);
+            if (!_isOpen)
+            {
+                _items[_items.Count - 1].SetActive(false);
+            }
             OnlyDisplayCurrentPage();
             _currentlySelectedIndex = 0;
             return;
@@ -353,6 +357,10 @@ public class Inventory : MonoBehaviour
             script.SetUpDisplay();
             script.SetParentTransform(initialTransform);
             _items.Add(newItem);
+            if (!_isOpen)
+            {
+                _items[_items.Count - 1].SetActive(false);
+            }
             OnlyDisplayCurrentPage();
             AddUntilNoItemsLeft(newItem, (int)remainingItems);
             return;
@@ -385,6 +393,10 @@ public class Inventory : MonoBehaviour
                 script.SetUpDisplay();
                 script.SetParentTransform(initialTransform);
                 _items.Add(newobj);
+                if (!_isOpen)
+                {
+                    _items[_items.Count - 1].SetActive(false);
+                }
                 OnlyDisplayCurrentPage();
             }
             else
@@ -395,6 +407,10 @@ public class Inventory : MonoBehaviour
                 script.SetUpDisplay();
                 script.SetParentTransform(initialTransform);
                 _items.Add(newobj);
+                if (!_isOpen)
+                {
+                    _items[_items.Count - 1].SetActive(false);
+                }
                 OnlyDisplayCurrentPage();
             }
         }
@@ -431,9 +447,15 @@ public class Inventory : MonoBehaviour
 
     private void OnlyDisplayCurrentPage()
     {
+        if (!_isOpen) return;
         int initialPageIndex = 0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber);
         int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxItemsPerCol);
-        List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber), maxItemsPerCol * maxItemsPerRow);
+        if(lastPageIndex >= _items.Count)
+        {
+            lastPageIndex = _items.Count - 1;
+        }
+
+        List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
         foreach(GameObject item in currentPage)
         {
             item.SetActive(true);
