@@ -446,7 +446,8 @@ public class Inventory : MonoBehaviour
             }
         }
         OnlyDisplayCurrentPage();
-        _totalNumberOfPages = Mathf.FloorToInt(_items.Count / (maxItemsPerRow * maxRows)) + 1;
+        _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
+        if (_items.Count == 0) _totalNumberOfPages = 0;
         pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
         totalItemsText.text = "Num Items: " + _items.Count;
     }
