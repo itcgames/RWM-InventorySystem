@@ -202,6 +202,8 @@ public class Inventory : MonoBehaviour
                 obj.SetActive(true);
             }
         }
+        pagesText.gameObject.SetActive(true);
+        totalItemsText.gameObject.SetActive(true);
     }
 
     public void CloseInventory(string closeCommand)
@@ -223,6 +225,8 @@ public class Inventory : MonoBehaviour
                 obj.SetActive(false);
             }
         }
+        pagesText.gameObject.SetActive(false);
+        totalItemsText.gameObject.SetActive(false);
     }
 
     public void GoToNextItem()
@@ -353,6 +357,8 @@ public class Inventory : MonoBehaviour
             {
                 _items[_items.Count - 1].SetActive(false);
             }
+            _currentPageNumber = 0;
+            _totalNumberOfPages = 1;
             OnlyDisplayCurrentPage();
             _currentlySelectedIndex = 0;
             return;
@@ -422,6 +428,9 @@ public class Inventory : MonoBehaviour
                 OnlyDisplayCurrentPage();
             }
         }
+        _totalNumberOfPages = Mathf.CeilToInt(_items.Count / (maxItemsPerRow * maxRows));
+        pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+        totalItemsText.text = "Num Items: " + _items.Count;
     }
 
     private void AddNewItemToInventory(GameObject newItem, uint amount)
@@ -432,10 +441,6 @@ public class Inventory : MonoBehaviour
         script.SetUpDisplay();
         script.SetParentTransform(initialTransform);
         _items.Add(newItem);
-        if(IsOnCurrentPage(_items.Count - 1))
-        {
-
-        }
         OnlyDisplayCurrentPage();
         if (!_isOpen)
         {
@@ -480,6 +485,9 @@ public class Inventory : MonoBehaviour
             }
             _items[i].SetActive(false);
         }
+
+        pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+        totalItemsText.text = "Num Items: " + _items.Count;
     }
 
     private void SetPositionsForCurrentPage(List<GameObject> currentPage)
