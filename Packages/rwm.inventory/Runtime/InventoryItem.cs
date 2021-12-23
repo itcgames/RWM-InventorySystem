@@ -89,14 +89,17 @@ public class InventoryItem : MonoBehaviour
     {
         if (transform == null) return;
         RectTransform trans = gameObject.GetComponent<RectTransform>();
-        trans.transform.SetParent(transform);
-        trans.position = _position + transform.position;
+        //trans.transform.SetParent(transform);
+        //trans.position = _position + transform.position;
         trans.SetParent(canvas.transform);
     }
 
     public void SetCanvasAsParent()
     {
-        RectTransform trans = gameObject.GetComponent<RectTransform>();
-        trans.SetParent(canvas.transform);
+        if(transform.parent != canvas.transform)
+        {
+            RectTransform trans = gameObject.GetComponent<RectTransform>();
+            trans.SetParent(canvas.transform);
+        }
     }
 }

@@ -197,9 +197,20 @@ public class Inventory : MonoBehaviour
         Debug.Log("Inventory Opened");
         if (_items != null)
         {
-            foreach (GameObject obj in _items)
+            int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
+            int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+            if (lastPageIndex >= _items.Count)
             {
-                obj.SetActive(true);
+                lastPageIndex = _items.Count - 1;
+            }
+
+            List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
+            if (_isOpen)
+            {
+                foreach (GameObject item in currentPage)
+                {
+                    item.SetActive(true);
+                }
             }
         }
         pagesText.gameObject.SetActive(true);
@@ -352,6 +363,7 @@ public class Inventory : MonoBehaviour
             script.Position = initialItemPosition;
             script.SetUpDisplay();
             script.SetParentTransform(initialTransform);
+            script.SetCanvasAsParent();
             _items.Add(newItem);
             if (!_isOpen)
             {
@@ -370,6 +382,7 @@ public class Inventory : MonoBehaviour
             script.Position = initialItemPosition;
             script.SetUpDisplay();
             script.SetParentTransform(initialTransform);
+            script.SetCanvasAsParent();
             _items.Add(newItem);
             if (!_isOpen)
             {
@@ -404,31 +417,36 @@ public class Inventory : MonoBehaviour
                 amountOfItems -= (int)script.MaxItemsPerStack;
                 GameObject newobj = Instantiate(itemType);
                 newobj.GetComponent<InventoryItem>().NumberOfItems = script.MaxItemsPerStack;
-                script.SetUpDisplay();
-                script.SetParentTransform(initialTransform);
+                InventoryItem newScript = newobj.GetComponent<InventoryItem>();
+                newScript.Position = initialItemPosition;
+                newScript.SetUpDisplay();
+                newScript.SetParentTransform(initialTransform);
+                newScript.SetCanvasAsParent();
                 _items.Add(newobj);
                 if (!_isOpen)
                 {
                     _items[_items.Count - 1].SetActive(false);
-                }
-                OnlyDisplayCurrentPage();
+                }                
             }
             else
             {
                 GameObject newobj = Instantiate(itemType);
                 newobj.GetComponent<InventoryItem>().NumberOfItems = (uint)amountOfItems;
                 amountOfItems = 0;
-                script.SetUpDisplay();
-                script.SetParentTransform(initialTransform);
+                InventoryItem newScript = newobj.GetComponent<InventoryItem>();
+                newScript.Position = initialItemPosition;
+                newScript.SetUpDisplay();
+                newScript.SetParentTransform(initialTransform);
+                newScript.SetCanvasAsParent();
                 _items.Add(newobj);
                 if (!_isOpen)
                 {
                     _items[_items.Count - 1].SetActive(false);
                 }
-                OnlyDisplayCurrentPage();
             }
         }
-        _totalNumberOfPages = Mathf.CeilToInt(_items.Count / (maxItemsPerRow * maxRows));
+        OnlyDisplayCurrentPage();
+        _totalNumberOfPages = Mathf.FloorToInt(_items.Count / (maxItemsPerRow * maxRows)) + 1;
         pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
         totalItemsText.text = "Num Items: " + _items.Count;
     }
@@ -438,8 +456,10 @@ public class Inventory : MonoBehaviour
         if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         InventoryItem script = newItem.GetComponent<InventoryItem>();
+        script.Position = initialItemPosition;
         script.SetUpDisplay();
         script.SetParentTransform(initialTransform);
+        script.SetCanvasAsParent();
         _items.Add(newItem);
         OnlyDisplayCurrentPage();
         if (!_isOpen)
@@ -496,6 +516,7 @@ public class Inventory : MonoBehaviour
         int countOnRow = 0;
         foreach (GameObject item in currentPage)
         {
+            Debug.Log(originalPosition);
             item.GetComponent<RectTransform>().anchoredPosition = originalPosition;
             countOnRow++;
             if(countOnRow >= maxItemsPerRow)
