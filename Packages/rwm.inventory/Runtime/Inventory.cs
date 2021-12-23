@@ -35,7 +35,7 @@ public class Inventory : MonoBehaviour
     public int rowOffset = 10;
     public int columnOffset = 10;
     public int maxItemsPerRow = 0;
-    public int maxItemsPerCol = 0;
+    public int maxRows = 0;
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -89,6 +89,14 @@ public class Inventory : MonoBehaviour
                 totalItemsText.text = "Total Items in Inventory: " + _items.Count;
             }
             totalItemsText.gameObject.SetActive(false);
+        }
+    }
+
+    private void Update()
+    {
+        foreach(GameObject obj in _items)
+        {
+            obj.GetComponent<InventoryItem>().SetCanvasAsParent();
         }
     }
 
@@ -447,21 +455,24 @@ public class Inventory : MonoBehaviour
 
     private void OnlyDisplayCurrentPage()
     {
-        if (!_isOpen) return;
-        int initialPageIndex = 0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber);
-        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxItemsPerCol);
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
         if(lastPageIndex >= _items.Count)
         {
             lastPageIndex = _items.Count - 1;
         }
 
-        List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
-        foreach(GameObject item in currentPage)
+        List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
+        if(_isOpen)
         {
-            item.SetActive(true);
+            foreach (GameObject item in currentPage)
+            {
+                item.SetActive(true);
+            }
         }
+        SetPositionsForCurrentPage(currentPage);
 
-        for(int i = 0; i < _items.Count; i++)
+        for (int i = 0; i < _items.Count; i++)
         {
             if(i >= initialPageIndex && i <= lastPageIndex)
             {
@@ -471,10 +482,31 @@ public class Inventory : MonoBehaviour
         }
     }
 
+    private void SetPositionsForCurrentPage(List<GameObject> currentPage)
+    {
+        Vector3 originalPosition = initialTransform.position;
+        int countOnRow = 0;
+        foreach (GameObject item in currentPage)
+        {
+            item.GetComponent<RectTransform>().anchoredPosition = originalPosition;
+            countOnRow++;
+            if(countOnRow >= maxItemsPerRow)
+            {
+                countOnRow = 0;
+                originalPosition.x = initialTransform.position.x;
+                originalPosition.y += columnOffset;
+            }
+            else
+            {
+                originalPosition.x += rowOffset;
+            }
+        }
+    }
+
     private bool IsOnCurrentPage(int index)
     {
-        int initialPageIndex = 0 + ((maxItemsPerRow * maxItemsPerCol) * _currentPageNumber);
-        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxItemsPerCol);
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows);
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
 }

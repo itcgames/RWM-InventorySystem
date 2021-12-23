@@ -93,4 +93,10 @@ public class InventoryItem : MonoBehaviour
         trans.position = _position + transform.position;
         trans.SetParent(canvas.transform);
     }
+
+    public void SetCanvasAsParent()
+    {
+        RectTransform trans = gameObject.GetComponent<RectTransform>();
+        trans.SetParent(canvas.transform);
+    }
 }
