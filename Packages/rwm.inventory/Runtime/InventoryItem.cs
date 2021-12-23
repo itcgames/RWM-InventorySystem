@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class InventoryItem : MonoBehaviour
 {
@@ -16,9 +17,18 @@ public class InventoryItem : MonoBehaviour
         " Updating number of items without setting this to true won't affect the inventory.")]
     [SerializeField]
     private bool isStackable = true;
+    [SerializeField]
+    private Sprite _sprite;
+    private Image _image;
+    private int _row;
+    private int _col;
 
+    public Canvas canvas;
     public delegate void Use();
     public Use useFunction;
+    private Vector3 _position;
+
+    public Vector3 Position { get => _position; set => _position = value; }
 
     public uint NumberOfItems { get => numberOfItems; set {
             if (value > maxItemsPerStack)
@@ -40,8 +50,56 @@ public class InventoryItem : MonoBehaviour
         } }
     public bool IsStackable { get => isStackable; set => isStackable = value; }
 
+    public Image Image { get => _image; set => _image = value; }
+
+    public Sprite Sprite { get => _sprite; set => _sprite = value; }
+
+    public int Row { get => _row; set => _row = value; }
+
+    public int Col { get => _col; set => _col = value; }
+
     public void SetToMaxStackAmount()
     {
         numberOfItems = maxItemsPerStack;
+    }
+
+    private void Start()
+    {
+        _image = gameObject.GetComponent<Image>();
+        if(_image == null)
+        {
+            _image = gameObject.AddComponent<Image>();
+            _image.sprite = _sprite;
+        }       
+    }
+
+    public void SetUpDisplay()
+    {
+        RectTransform trans = gameObject.GetComponent<RectTransform>();
+        if(trans == null)
+        {
+            trans = gameObject.AddComponent<RectTransform>();
+        }
+        trans.localScale = Vector3.one;
+        trans.anchoredPosition = _position;
+        trans.sizeDelta = new Vector2(30, 30);
+    }
+
+    public void SetParentTransform(Transform transform)
+    {
+        if (transform == null) return;
+        RectTransform trans = gameObject.GetComponent<RectTransform>();
+        //trans.transform.SetParent(transform);
+        //trans.position = _position + transform.position;
+        trans.SetParent(canvas.transform);
+    }
+
+    public void SetCanvasAsParent()
+    {
+        if(transform.parent != canvas.transform)
+        {
+            RectTransform trans = gameObject.GetComponent<RectTransform>();
+            trans.SetParent(canvas.transform);
+        }
     }
 }
