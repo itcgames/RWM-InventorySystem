@@ -213,8 +213,12 @@ public class Inventory : MonoBehaviour
                 }
             }
         }
-        pagesText.gameObject.SetActive(true);
-        totalItemsText.gameObject.SetActive(true);
+
+        if(_useDefaultDisplay)
+        {
+            pagesText.gameObject.SetActive(true);
+            totalItemsText.gameObject.SetActive(true);
+        }
     }
 
     public void CloseInventory(string closeCommand)
@@ -236,8 +240,11 @@ public class Inventory : MonoBehaviour
                 obj.SetActive(false);
             }
         }
-        pagesText.gameObject.SetActive(false);
-        totalItemsText.gameObject.SetActive(false);
+        if(_useDefaultDisplay)
+        {
+            pagesText.gameObject.SetActive(false);
+            totalItemsText.gameObject.SetActive(false);
+        }
     }
 
     public void GoToNextItem()
@@ -359,11 +366,13 @@ public class Inventory : MonoBehaviour
         if ((script.NumberOfItems + amount) <= script.MaxItemsPerStack)
         {
             script.NumberOfItems = script.NumberOfItems + amount;
-            //script.Image
-            script.Position = initialItemPosition;
-            script.SetUpDisplay();
-            script.SetParentTransform(initialTransform);
-            script.SetCanvasAsParent();
+            if (_useDefaultDisplay)
+            {
+                script.Position = initialItemPosition;
+                script.SetUpDisplay();
+                script.SetParentTransform(initialTransform);
+                script.SetCanvasAsParent();
+            }
             _items.Add(newItem);
             if (!_isOpen)
             {
@@ -371,7 +380,7 @@ public class Inventory : MonoBehaviour
             }
             _currentPageNumber = 0;
             _totalNumberOfPages = 1;
-            OnlyDisplayCurrentPage();
+            if(_useDefaultDisplay) OnlyDisplayCurrentPage();
             _currentlySelectedIndex = 0;
             return;
         }
@@ -379,16 +388,19 @@ public class Inventory : MonoBehaviour
         {
             uint remainingItems = amount - (script.MaxItemsPerStack - script.NumberOfItems);
             script.NumberOfItems = script.MaxItemsPerStack;
-            script.Position = initialItemPosition;
-            script.SetUpDisplay();
-            script.SetParentTransform(initialTransform);
-            script.SetCanvasAsParent();
+            if (_useDefaultDisplay)
+            {
+                script.Position = initialItemPosition;
+                script.SetUpDisplay();
+                script.SetParentTransform(initialTransform);
+                script.SetCanvasAsParent();
+            }
             _items.Add(newItem);
             if (!_isOpen)
             {
                 _items[_items.Count - 1].SetActive(false);
             }
-            OnlyDisplayCurrentPage();
+            if(_useDefaultDisplay) OnlyDisplayCurrentPage();
             AddUntilNoItemsLeft(newItem, (int)remainingItems);
             return;
         }        
@@ -418,10 +430,13 @@ public class Inventory : MonoBehaviour
                 GameObject newobj = Instantiate(itemType);
                 newobj.GetComponent<InventoryItem>().NumberOfItems = script.MaxItemsPerStack;
                 InventoryItem newScript = newobj.GetComponent<InventoryItem>();
-                newScript.Position = initialItemPosition;
-                newScript.SetUpDisplay();
-                newScript.SetParentTransform(initialTransform);
-                newScript.SetCanvasAsParent();
+                if (_useDefaultDisplay)
+                {
+                    newScript.Position = initialItemPosition;
+                    newScript.SetUpDisplay();
+                    newScript.SetParentTransform(initialTransform);
+                    newScript.SetCanvasAsParent();
+                }
                 _items.Add(newobj);
                 if (!_isOpen)
                 {
@@ -434,10 +449,14 @@ public class Inventory : MonoBehaviour
                 newobj.GetComponent<InventoryItem>().NumberOfItems = (uint)amountOfItems;
                 amountOfItems = 0;
                 InventoryItem newScript = newobj.GetComponent<InventoryItem>();
-                newScript.Position = initialItemPosition;
-                newScript.SetUpDisplay();
-                newScript.SetParentTransform(initialTransform);
-                newScript.SetCanvasAsParent();
+                if(_useDefaultDisplay)
+                {
+                    newScript.Position = initialItemPosition;
+                    newScript.SetUpDisplay();
+                    newScript.SetParentTransform(initialTransform);
+                    newScript.SetCanvasAsParent();
+                }
+
                 _items.Add(newobj);
                 if (!_isOpen)
                 {
@@ -445,11 +464,15 @@ public class Inventory : MonoBehaviour
                 }
             }
         }
-        OnlyDisplayCurrentPage();
-        _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
-        if (_items.Count == 0) _totalNumberOfPages = 0;
-        pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
-        totalItemsText.text = "Num Items: " + _items.Count;
+        if (_useDefaultDisplay) OnlyDisplayCurrentPage();
+        if (_useDefaultDisplay)
+        {
+            _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
+            if (_items.Count == 0) _totalNumberOfPages = 0;
+            pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+            totalItemsText.text = "Num Items: " + _items.Count;
+        }
+
     }
 
     private void AddNewItemToInventory(GameObject newItem, uint amount)
@@ -462,7 +485,7 @@ public class Inventory : MonoBehaviour
         script.SetParentTransform(initialTransform);
         script.SetCanvasAsParent();
         _items.Add(newItem);
-        OnlyDisplayCurrentPage();
+        if(_useDefaultDisplay) OnlyDisplayCurrentPage();
         if (!_isOpen)
         {
             _items[_items.Count - 1].SetActive(false);

@@ -69,7 +69,10 @@ public class InventoryItem : MonoBehaviour
         if(_image == null)
         {
             _image = gameObject.AddComponent<Image>();
-            _image.sprite = _sprite;
+            if(_sprite != null)
+            {
+                _image.sprite = _sprite;
+            }          
         }       
     }
 
@@ -81,22 +84,21 @@ public class InventoryItem : MonoBehaviour
             trans = gameObject.AddComponent<RectTransform>();
         }
         trans.localScale = Vector3.one;
-        trans.anchoredPosition = _position;
+        trans.anchoredPosition = (_position != null) ? _position : new Vector3(0,0,0);
         trans.sizeDelta = new Vector2(30, 30);
     }
 
     public void SetParentTransform(Transform transform)
     {
-        if (transform == null) return;
+        if (transform == null || canvas == null) return;
         RectTransform trans = gameObject.GetComponent<RectTransform>();
-        //trans.transform.SetParent(transform);
-        //trans.position = _position + transform.position;
         trans.SetParent(canvas.transform);
     }
 
     public void SetCanvasAsParent()
     {
-        if(transform.parent != canvas.transform)
+        if (transform == null || canvas == null) return;
+        if (transform.parent != canvas.transform)
         {
             RectTransform trans = gameObject.GetComponent<RectTransform>();
             trans.SetParent(canvas.transform);
