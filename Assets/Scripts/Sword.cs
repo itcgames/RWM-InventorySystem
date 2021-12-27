@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Potion : MonoBehaviour
+public class Sword : MonoBehaviour
 {
     InventoryItem _item;
     // Start is called before the first frame update
     void Awake()
     {
         _item = GetComponent<InventoryItem>();
-        _item.useFunction += HealPlayer;
+        _item.useFunction += GainStrength;
     }
 
-    bool HealPlayer()
+    bool GainStrength()
     {
-        Debug.Log("Healing player");
+        Debug.Log("Player Gaining Strength");
         GameObject player = GameObject.FindGameObjectWithTag("Player");
         PlayerScript script = player.GetComponent<PlayerScript>();
-        return script.Heal(1.5f);
+        return script.GainStrength(1.5f);
     }
 }
