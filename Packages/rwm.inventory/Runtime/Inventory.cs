@@ -101,6 +101,13 @@ public class Inventory : MonoBehaviour
         {
             obj.GetComponent<InventoryItem>().SetCanvasAsParent();
         }
+        if (_useDefaultDisplay)
+        {
+            _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
+            if (_items.Count == 0) _totalNumberOfPages = 0;
+            pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+            totalItemsText.text = "Num Items: " + _items.Count;
+        }
     }
 
     public GameObject GetCurrentlySelectedObject()
@@ -133,6 +140,7 @@ public class Inventory : MonoBehaviour
         if (_items == null)//if this is the first item to be put into the inventory
         {
             AddFirstItemToInventory(newItem, amount);
+            OnlyDisplayCurrentPage();
             return;
         }
         if (newItem.GetComponent<InventoryItem>().IsStackable)
@@ -142,10 +150,12 @@ public class Inventory : MonoBehaviour
             if (lastItem != null)
             {
                 AddUntilNoItemsLeft(lastItem, (int)amount);
+                OnlyDisplayCurrentPage();
                 return;
             }
         }
         AddNewItemToInventory(newItem, amount);
+        OnlyDisplayCurrentPage();
     }
 
     public void UseItem(string submitCommand)
@@ -178,9 +188,14 @@ public class Inventory : MonoBehaviour
             item.NumberOfItems--;
             if (item.NumberOfItems <= 0)
             {
+                GameObject obj = _items[_currentlySelectedIndex];
                 _items.Remove(_items[_currentlySelectedIndex]);
-                if (_items.Count - 1 < _currentlySelectedIndex && _items.Count > 0) _currentlySelectedIndex--;
-                if (_items.Count == 0) _currentlySelectedIndex = -1;
+                Destroy(obj);
+                _currentlySelectedIndex--;
+                if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
+                OnlyDisplayCurrentPage();
+                //if (_items.Count - 1 < _currentlySelectedIndex && _items.Count > 0) _currentlySelectedIndex--;
+                //if (_items.Count == 0) _currentlySelectedIndex = -1;
                 Debug.Log("Removing used item from inventory");
             }
         }
@@ -268,26 +283,7 @@ public class Inventory : MonoBehaviour
                     OnlyDisplayCurrentPage();
                     return;
                 }
-                //if(_currentlySelectedIndex )
                 _currentlySelectedIndex++;
-                //if(_currentlySelectedIndex % maxItemsPerRow == 0)
-                //{
-                //    if(_items.Count >= (maxItemsPerRow * maxRows) && _currentlySelectedIndex < (_maxStackAmount - maxItemsPerRow))
-                //    {
-                //        _currentlySelectedIndex += maxItemsPerRow;
-                //        _currentPageNumber++;
-                //        OnlyDisplayCurrentPage();
-                //    }
-                //}
-                //if(_currentlySelectedIndex == maxItemsPerRow * (_currentPageNumber + 1))
-                //{
-                //    if (_items.Count >= (maxItemsPerRow * maxRows) && _currentlySelectedIndex < (_maxStackAmount - maxItemsPerRow))
-                //    {
-                //        _currentlySelectedIndex += maxItemsPerRow;
-                //        _currentPageNumber++;
-                //        OnlyDisplayCurrentPage();
-                //    }
-                //}
                 if (cursor != null)
                     cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             }
@@ -551,6 +547,7 @@ public class Inventory : MonoBehaviour
 
     private void OnlyDisplayCurrentPage()
     {
+        if (_items == null || _items.Count == 0) return;
         int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
         int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
         if(lastPageIndex >= _items.Count)

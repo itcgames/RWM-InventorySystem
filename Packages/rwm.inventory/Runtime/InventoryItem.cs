@@ -104,4 +104,10 @@ public class InventoryItem : MonoBehaviour
             trans.SetParent(canvas.transform);
         }
     }
+
+    public void OnDestroy()
+    {
+        //_image.enabled = false;
+        //Destroy(_image);
+    }
 }
