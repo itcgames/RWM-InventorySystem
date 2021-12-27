@@ -174,30 +174,31 @@ public class Inventory : MonoBehaviour
             if (_items.Count == 0) return;
             if (_items[_currentlySelectedIndex] == null) return;
             InventoryItem item = _items[_currentlySelectedIndex].GetComponent<InventoryItem>();
-
+            bool wasUsed = true;
             if(item.useFunction != null)
             {
                 Debug.Log("has function");
-                item.useFunction();
+                wasUsed = item.useFunction();
             }
             else
             {
                 if (_usedItems == null) _usedItems = new List<GameObject>();
                 _usedItems.Add(_items[_currentlySelectedIndex]);
             }
-            item.NumberOfItems--;
-            if (item.NumberOfItems <= 0)
+            if(wasUsed)
             {
-                GameObject obj = _items[_currentlySelectedIndex];
-                _items.Remove(_items[_currentlySelectedIndex]);
-                Destroy(obj);
-                _currentlySelectedIndex--;
-                if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
-                OnlyDisplayCurrentPage();
-                //if (_items.Count - 1 < _currentlySelectedIndex && _items.Count > 0) _currentlySelectedIndex--;
-                //if (_items.Count == 0) _currentlySelectedIndex = -1;
-                Debug.Log("Removing used item from inventory");
-            }
+                item.NumberOfItems--;
+                if (item.NumberOfItems <= 0)
+                {
+                    GameObject obj = _items[_currentlySelectedIndex];
+                    _items.Remove(_items[_currentlySelectedIndex]);
+                    Destroy(obj);
+                    _currentlySelectedIndex--;
+                    if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
+                    OnlyDisplayCurrentPage();
+                    Debug.Log("Removing used item from inventory");
+                }
+            }  
         }
     }
 
@@ -294,8 +295,16 @@ public class Inventory : MonoBehaviour
     {
         if(_isOpen)
         {
+            int indexOfFirstItemOnCurrentPage = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
             if(_currentlySelectedIndex > 0)
             {
+                if(_currentlySelectedIndex == indexOfFirstItemOnCurrentPage && _currentlySelectedIndex > 0)
+                {
+                    _currentPageNumber--;
+                    _currentlySelectedIndex--;
+                    OnlyDisplayCurrentPage();
+                    return;
+                }
                 _currentlySelectedIndex--;
                 if (cursor != null)
                     cursor.transform.position = _items[_currentlySelectedIndex].transform.position;

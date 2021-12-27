@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class InventoryItem : MonoBehaviour
 {
@@ -24,7 +25,8 @@ public class InventoryItem : MonoBehaviour
     private int _col;
 
     public Canvas canvas;
-    public delegate void Use();
+    [SerializeField]
+    public delegate bool Use();//should return true if succeeded, otherwise false
     public Use useFunction;
     private Vector3 _position;
 
@@ -103,11 +105,5 @@ public class InventoryItem : MonoBehaviour
             RectTransform trans = gameObject.GetComponent<RectTransform>();
             trans.SetParent(canvas.transform);
         }
-    }
-
-    public void OnDestroy()
-    {
-        //_image.enabled = false;
-        //Destroy(_image);
     }
 }
