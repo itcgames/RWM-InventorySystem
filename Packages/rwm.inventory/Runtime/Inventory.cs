@@ -258,8 +258,16 @@ public class Inventory : MonoBehaviour
     {
         if(_isOpen)
         {
+            int indexOfLastItemOnCurrentPage = ((maxItemsPerRow * maxRows) * (_currentPageNumber + 1)) - 1;
             if(_items.Count > _currentlySelectedIndex + 1)
             {
+                if(_currentlySelectedIndex == indexOfLastItemOnCurrentPage && _currentlySelectedIndex < _items.Count - 1)
+                {
+                    _currentPageNumber++;
+                    _currentlySelectedIndex++;
+                    OnlyDisplayCurrentPage();
+                    return;
+                }
                 //if(_currentlySelectedIndex )
                 _currentlySelectedIndex++;
                 //if(_currentlySelectedIndex % maxItemsPerRow == 0)

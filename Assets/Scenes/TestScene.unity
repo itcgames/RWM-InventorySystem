@@ -270,7 +270,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6dbf903c8f92df94792142c5d1a44221, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  _maxStackAmount: 20
+  _maxStackAmount: 30
   _useDefaultDisplay: 1
   _font: {fileID: 10102, guid: 0000000000000000e000000000000000, type: 0}
   initialItemPosition: {x: 0, y: 0, z: 0}
@@ -278,7 +278,7 @@ MonoBehaviour:
   pagesText: {fileID: 812381474}
   totalItemsText: {fileID: 1923825996}
   rowOffset: 50
-  columnOffset: 50
+  columnOffset: -50
   maxItemsPerRow: 5
   maxRows: 2
   cursor: {fileID: 241117414}
