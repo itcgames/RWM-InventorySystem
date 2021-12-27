@@ -1055,6 +1055,7 @@ GameObject:
   - component: {fileID: 1383226730}
   - component: {fileID: 1383226729}
   - component: {fileID: 1383226728}
+  - component: {fileID: 1383226731}
   m_Layer: 0
   m_Name: sword
   m_TagString: Item
@@ -1190,6 +1191,18 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 1, y: 1}
   m_EdgeRadius: 0
+--- !u!114 &1383226731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1383226725}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9254b9bdd69d79b44a1690077ede0a1b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1560228171
 GameObject:
   m_ObjectHideFlags: 0
@@ -1364,6 +1377,7 @@ GameObject:
   - component: {fileID: 1854715221}
   - component: {fileID: 1854715220}
   - component: {fileID: 1854715219}
+  - component: {fileID: 1854715222}
   m_Layer: 0
   m_Name: shield
   m_TagString: Item
@@ -1499,6 +1513,18 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
+--- !u!114 &1854715222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1854715216}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 75231035943e5b64b92fd3aa2e1545b6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1889821993
 GameObject:
   m_ObjectHideFlags: 0
