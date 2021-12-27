@@ -62,6 +62,26 @@ public class PlayerScript : MonoBehaviour
         {
             inventory.UseItem();
         }
+
+        if(inventory.IsOpen)
+        {
+            if(Input.GetKeyDown(KeyCode.J))
+            {
+                inventory.GoToPreviousItem();
+            }
+            else if(Input.GetKeyDown(KeyCode.L))
+            {
+                inventory.GoToNextItem();
+            }
+            else if (Input.GetKeyDown(KeyCode.U))
+            {
+                inventory.GoToItemAbove();
+            }
+            else if (Input.GetKeyDown(KeyCode.K))
+            {
+                inventory.GoToItemBelow();
+            }
+        }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
