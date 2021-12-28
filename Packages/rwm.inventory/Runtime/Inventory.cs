@@ -572,7 +572,7 @@ public class Inventory : MonoBehaviour
                 item.SetActive(true);
             }
         }
-        SetPositionsForCurrentPage(currentPage);
+        if(_useDefaultDisplay) SetPositionsForCurrentPage(currentPage);
 
         for (int i = 0; i < _items.Count; i++)
         {
