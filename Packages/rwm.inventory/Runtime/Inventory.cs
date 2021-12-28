@@ -582,14 +582,15 @@ public class Inventory : MonoBehaviour
             }
             _items[i].SetActive(false);
         }
-
-        pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
-        totalItemsText.text = "Num Items: " + _items.Count;
+        if(pagesText != null)
+            pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+        if(totalItemsText != null)
+            totalItemsText.text = "Num Items: " + _items.Count;
     }
 
     private void SetPositionsForCurrentPage(List<GameObject> currentPage)
     {
-        Vector3 originalPosition = initialTransform.position;
+        Vector3 originalPosition = (initialTransform != null) ? initialTransform.position : new Vector3(0,0,0);
         int countOnRow = 0;
         foreach (GameObject item in currentPage)
         {
