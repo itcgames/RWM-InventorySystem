@@ -23,6 +23,7 @@ public class PlayerScript : MonoBehaviour
     {
         _health = 10.0f;
         inventory = GetComponentInChildren<Inventory>();
+        currentIndex.enabled = false;
     }
 
     public bool Heal(float amount)
@@ -75,10 +76,12 @@ public class PlayerScript : MonoBehaviour
             if(inventory.IsOpen)
             {
                 inventory.CloseInventory();
+                currentIndex.enabled = false;
             }
             else
             {
                 inventory.OpenInventory();
+                currentIndex.enabled = true;
             }
         }
         else if(Input.GetKeyDown(KeyCode.Return))
@@ -127,7 +130,6 @@ public class PlayerScript : MonoBehaviour
                 Destroy(item.GetComponent<BoxCollider2D>());
             }
             item.GetComponent<InventoryItem>().canvas = collision.gameObject.GetComponent<InventoryItem>().canvas;
-            //item.AddComponent<InventoryItem>();
             inventory.AddItem(item, 1);
             Destroy(collision.gameObject);
             item.SetActive(false);

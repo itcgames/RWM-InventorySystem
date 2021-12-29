@@ -10,11 +10,12 @@ public class InventoryItem : MonoBehaviour
     [Tooltip("This is the name of the item so that the inventory is able to check if it is already in the inventory when adding new items. This name will also be used to display the name " +
         "of the item if the default display is being used and this item is currently selected.")]
     [SerializeField]
-    private string _itemTag = defaultString;
+    private string _itemTag = null;
     [Tooltip("This is the description of the item that will be displayed if the default display for the inventory is being used and this item is currently selected." +
         "This can be left as null if you are not using the default display inside of the inventory that you will be adding this item to.")]
     [SerializeField]
-    private string _description = defaultString;
+    [TextArea]
+    private string _description = null;
     [Tooltip("Set to true if you want the number of items in the current stack to be displayed inside of the inventory when the item is being hovered over.")]
     [SerializeField]
     private bool _displayNumberOfItems;
