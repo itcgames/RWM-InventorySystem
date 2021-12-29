@@ -14,6 +14,25 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
     private Font _font;
+    [SerializeField]
+    [Tooltip("Set to true if you want to display info on the current item when the inventory is open. The corresponding text variables need to be passed in so that the inventory is able" +
+        "to properly display the info")]
+    private bool _displayCurrentItemInfo;
+    [SerializeField]
+    [Tooltip("Set this text if you want the name of the current item to be displayed.")]
+    private Text _currentItemName;
+    [SerializeField]
+    private Vector2 _currentNameOffset;
+    [SerializeField]
+    [Tooltip("Set this text if you want the description for the current item to be displayed.")]
+    private Text _currentItemDescription;
+    [SerializeField]
+    private Vector2 _currentDescriptionOffset;
+    [SerializeField]
+    [Tooltip("Set to text if you want the current item amount to be displayed")]
+    private Text _currentItemAmount;
+    [SerializeField]
+    private Vector2 _currentAmountOffset;
     private List<GameObject> _items;
     private List<GameObject> _usedItems;
     private bool _isOpen;
@@ -21,10 +40,6 @@ public class Inventory : MonoBehaviour
     private string _openCommand = _notSetString;
     private string _closeCommand = _notSetString;
     private string _submitCommand = _notSetString;
-    private string _goToNextCommand = _notSetString;
-    private string _goToAboveCommand = _notSetString;
-    private string _goToBelowCommand = _notSetString;
-    private string _goToPreviousCommand = _notSetString;
     private int _currentlySelectedIndex = -1;
     private int _currentPageNumber = 0;
     private int _totalNumberOfPages = 0;
@@ -76,7 +91,13 @@ public class Inventory : MonoBehaviour
         if(cursor != null)
             cursor.SetActive(false);
         _usedItems = new List<GameObject>();
-        if(pagesText != null)
+        if(_currentItemName != null)
+            _currentItemName.gameObject.SetActive(false);
+        if(_currentItemDescription != null)
+            _currentItemDescription.gameObject.SetActive(false);
+        if (_currentItemAmount != null)
+            _currentItemAmount.gameObject.SetActive(false);
+        if (pagesText != null)
         {
             pagesText.text = "Page " + _currentPageNumber + " of " + _totalNumberOfPages;
             pagesText.gameObject.SetActive(false);
@@ -188,6 +209,7 @@ public class Inventory : MonoBehaviour
             if(wasUsed)
             {
                 item.NumberOfItems--;
+                DisplayInfoOnCurrentItem();
                 if (item.NumberOfItems <= 0)
                 {
                     GameObject obj = _items[_currentlySelectedIndex];
@@ -237,8 +259,17 @@ public class Inventory : MonoBehaviour
         {
             pagesText.gameObject.SetActive(true);
             totalItemsText.gameObject.SetActive(true);
-            if (cursor != null)
-                cursor.SetActive(true);
+            if(_displayCurrentItemInfo && _items != null && _items.Count > 0)
+            {
+                if (cursor != null)
+                    cursor.SetActive(true);
+                if (_currentItemName != null)
+                    _currentItemName.gameObject.SetActive(true);
+                if (_currentItemDescription != null)
+                    _currentItemDescription.gameObject.SetActive(true);
+                if (_currentItemAmount != null)
+                    _currentItemAmount.gameObject.SetActive(true);
+            }
         }
     }
 
@@ -267,6 +298,12 @@ public class Inventory : MonoBehaviour
             totalItemsText.gameObject.SetActive(false);
             if (cursor != null)
                 cursor.SetActive(false);
+            if (_currentItemName != null)
+                _currentItemName.gameObject.SetActive(false);
+            if (_currentItemDescription != null)
+                _currentItemDescription.gameObject.SetActive(false);
+            if (_currentItemAmount != null)
+                _currentItemAmount.gameObject.SetActive(false);
         }
     }
 
@@ -281,10 +318,12 @@ public class Inventory : MonoBehaviour
                 {
                     _currentPageNumber++;
                     _currentlySelectedIndex++;
+                    DisplayInfoOnCurrentItem();
                     OnlyDisplayCurrentPage();
                     return;
                 }
                 _currentlySelectedIndex++;
+                DisplayInfoOnCurrentItem();
                 if (cursor != null)
                     cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             }
@@ -302,10 +341,12 @@ public class Inventory : MonoBehaviour
                 {
                     _currentPageNumber--;
                     _currentlySelectedIndex--;
+                    DisplayInfoOnCurrentItem();
                     OnlyDisplayCurrentPage();
                     return;
                 }
                 _currentlySelectedIndex--;
+                DisplayInfoOnCurrentItem();
                 if (cursor != null)
                     cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             }
@@ -320,6 +361,7 @@ public class Inventory : MonoBehaviour
             if(_items.Count > _currentlySelectedIndex + maxItemsPerRow)
             {
                 _currentlySelectedIndex += maxItemsPerRow;
+                DisplayInfoOnCurrentItem();
                 if (cursor != null)
                     cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             }
@@ -333,6 +375,7 @@ public class Inventory : MonoBehaviour
             if(_currentlySelectedIndex - maxItemsPerRow >= 0)
             {
                 _currentlySelectedIndex -= maxItemsPerRow;
+                DisplayInfoOnCurrentItem();
                 if (cursor != null)
                     cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             }
@@ -384,26 +427,6 @@ public class Inventory : MonoBehaviour
     void SetCloseCommand(string closeCommand)
     {
         _closeCommand = closeCommand;
-    }
-
-    void SetGoToPreviousCommand(string previousCommand)
-    {
-        _goToPreviousCommand = previousCommand;
-    }
-
-    void SetGoToAboveCommand(string aboveCommand)
-    {
-        _goToAboveCommand = aboveCommand;
-    }
-
-    void SetGoToNextCommand(string nextCommand)
-    {
-        _goToNextCommand = nextCommand;
-    }
-
-    void SetGoToBelowCommand(string belowCommand)
-    {
-        _goToBelowCommand = belowCommand;
     }
 
     private void AddFirstItemToInventory(GameObject newItem, uint amount)
@@ -572,7 +595,7 @@ public class Inventory : MonoBehaviour
                 item.SetActive(true);
             }
         }
-        SetPositionsForCurrentPage(currentPage);
+        if(_useDefaultDisplay) SetPositionsForCurrentPage(currentPage);
 
         for (int i = 0; i < _items.Count; i++)
         {
@@ -582,14 +605,15 @@ public class Inventory : MonoBehaviour
             }
             _items[i].SetActive(false);
         }
-
-        pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
-        totalItemsText.text = "Num Items: " + _items.Count;
+        if(pagesText != null)
+            pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+        if(totalItemsText != null)
+            totalItemsText.text = "Num Items: " + _items.Count;
     }
 
     private void SetPositionsForCurrentPage(List<GameObject> currentPage)
     {
-        Vector3 originalPosition = initialTransform.position;
+        Vector3 originalPosition = (initialTransform != null) ? initialTransform.position : new Vector3(0,0,0);
         int countOnRow = 0;
         foreach (GameObject item in currentPage)
         {
@@ -609,6 +633,39 @@ public class Inventory : MonoBehaviour
         }
         if (cursor != null)
             cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
+        if (_displayCurrentItemInfo)
+            DisplayInfoOnCurrentItem();
+    }
+
+    private void DisplayInfoOnCurrentItem()
+    {
+        InventoryItem currentItem = _items[_currentlySelectedIndex].GetComponent<InventoryItem>();
+        Vector2 currentItemPosition = _items[_currentlySelectedIndex].transform.position;
+        if(_currentItemName != null && _currentNameOffset != null)
+        {
+            string text = (!string.IsNullOrEmpty(currentItem.Name)) ? currentItem.Name : "null";
+            _currentItemName.text = "Name: " + text;
+            _currentItemName.transform.position = currentItemPosition + _currentNameOffset;
+        }
+        if(_currentItemDescription != null && _currentDescriptionOffset != null)
+        {
+            string text = (!string.IsNullOrEmpty(currentItem.Description)) ? currentItem.Description : "null";
+            _currentItemDescription.text = "Description: " + text;
+            _currentItemDescription.transform.position = currentItemPosition + _currentDescriptionOffset;
+        }
+        if(_currentItemAmount != null && _currentAmountOffset != null)
+        {
+            _currentItemAmount.text = "Amount: " + currentItem.NumberOfItems;
+            _currentItemAmount.transform.position = currentItemPosition + _currentAmountOffset;
+            if(currentItem.DisplayAmountOfItems && _displayCurrentItemInfo)
+            {
+                _currentItemAmount.enabled = true;
+            }
+            else
+            {
+                _currentItemAmount.enabled = false;
+            }
+        }
     }
 
     private bool IsOnCurrentPage(int index)
