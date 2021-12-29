@@ -107,6 +107,11 @@ public class PlayerScript : MonoBehaviour
             {
                 inventory.GoToItemBelow();
             }
+            currentIndex.gameObject.SetActive(true);
+        }
+        else
+        {
+            currentIndex.gameObject.SetActive(false);
         }
 
         currentIndex.text = "Current Index: " + inventory.ActiveItemIndex;

@@ -130,6 +130,29 @@ public class Inventory : MonoBehaviour
             totalItemsText.text = "Num Items: " + _items.Count;
             OnlyDisplayCurrentPage();
         }
+        if(_isOpen && _useDefaultDisplay)
+        {
+            if (cursor != null)
+                cursor.SetActive(true);
+            if(_items != null && _items.Count > 0)
+            {
+                if (_currentItemName != null)
+                    _currentItemName.gameObject.SetActive(true);
+                if (_currentItemDescription != null)
+                    _currentItemDescription.gameObject.SetActive(true);
+                if (_currentItemAmount != null)
+                    _currentItemAmount.gameObject.SetActive(true);
+            }
+            else
+            {
+                if (_currentItemName != null)
+                    _currentItemName.gameObject.SetActive(false);
+                if (_currentItemDescription != null)
+                    _currentItemDescription.gameObject.SetActive(false);
+                if (_currentItemAmount != null)
+                    _currentItemAmount.gameObject.SetActive(false);
+            }           
+        }
     }
 
     public GameObject GetCurrentlySelectedObject()
