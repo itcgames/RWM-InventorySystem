@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class PlayerScript : MonoBehaviour
 {
@@ -11,24 +12,26 @@ public class PlayerScript : MonoBehaviour
     public GameObject prefab;
     public float maxHealth;
     float _health;
+    float _strength;
+    float _block;
+    public Text currentIndex;
+    public Text currentHealth;
+    public Text currentStrength;
+    public Text currentBlock;
     // Start is called before the first frame update
     void Start()
     {
-        _health = maxHealth / 2.0f;
+        _health = 10.0f;
         inventory = GetComponentInChildren<Inventory>();
-        for (int i = 0; i < itemsToAdd.Length; i++)
-        {
-            inventory.AddItem(Instantiate(itemsToAdd[i]), numberOfItemsToAdd[i]);
-        }
-        inventory.Items.ForEach(item => Debug.Log(item.GetComponent<InventoryItem>().NumberOfItems));
+        currentIndex.enabled = false;
     }
 
-    public void Heal(float amount)
+    public bool Heal(float amount)
     {
         if (_health == maxHealth)
         {
             Debug.Log("Player already at full health");
-            return;
+            return false;
         }
 
         if (_health + amount >= maxHealth)
@@ -41,6 +44,22 @@ public class PlayerScript : MonoBehaviour
             Debug.Log("Player healed for amount: " + amount);
             _health += amount;
         }
+        currentHealth.text = "Health: " + _health + " out of a max:\n " + maxHealth;
+        return true;
+    }
+
+    public bool GainStrength(float amount)
+    {
+        _strength += amount;
+        currentStrength.text = "Strength: " + _strength;
+        return true;
+    }
+
+    public bool GainBlock(float amount)
+    {
+        _block += amount;
+        currentBlock.text = "Block: " + _block;
+        return true;
     }
 
     private void Update()
@@ -57,16 +76,45 @@ public class PlayerScript : MonoBehaviour
             if(inventory.IsOpen)
             {
                 inventory.CloseInventory();
+                currentIndex.enabled = false;
             }
             else
             {
                 inventory.OpenInventory();
+                currentIndex.enabled = true;
             }
         }
         else if(Input.GetKeyDown(KeyCode.Return))
         {
             inventory.UseItem();
         }
+
+        if(inventory.IsOpen)
+        {
+            if(Input.GetKeyDown(KeyCode.J))
+            {
+                inventory.GoToPreviousItem();
+            }
+            else if(Input.GetKeyDown(KeyCode.L))
+            {
+                inventory.GoToNextItem();
+            }
+            else if (Input.GetKeyDown(KeyCode.U))
+            {
+                inventory.GoToItemAbove();
+            }
+            else if (Input.GetKeyDown(KeyCode.K))
+            {
+                inventory.GoToItemBelow();
+            }
+            currentIndex.gameObject.SetActive(true);
+        }
+        else
+        {
+            currentIndex.gameObject.SetActive(false);
+        }
+
+        currentIndex.text = "Current Index: " + inventory.ActiveItemIndex;
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
@@ -74,6 +122,19 @@ public class PlayerScript : MonoBehaviour
         if(collision.tag == "Item")
         {
             GameObject item = Instantiate(collision.gameObject);
+            if(item.GetComponent<SpriteRenderer>() != null)
+            {
+                Destroy(item.GetComponent<SpriteRenderer>());
+            }
+            if(item.GetComponent<Rigidbody2D>() != null)
+            {
+                Destroy(item.GetComponent<Rigidbody2D>());
+            }
+            if (item.GetComponent<BoxCollider2D>() != null)
+            {
+                Destroy(item.GetComponent<BoxCollider2D>());
+            }
+            item.GetComponent<InventoryItem>().canvas = collision.gameObject.GetComponent<InventoryItem>().canvas;
             inventory.AddItem(item, 1);
             Destroy(collision.gameObject);
             item.SetActive(false);

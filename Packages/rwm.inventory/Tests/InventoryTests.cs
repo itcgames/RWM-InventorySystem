@@ -454,9 +454,10 @@ namespace Tests
             return item;
         }
 
-        public void UseItem()
+        public bool UseItem()
         {
             Debug.Log("using an item in the tests");
+            return true;
         }
         #endregion
     }
