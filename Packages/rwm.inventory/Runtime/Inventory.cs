@@ -128,6 +128,7 @@ public class Inventory : MonoBehaviour
             if (_items.Count == 0) _totalNumberOfPages = 0;
             pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
             totalItemsText.text = "Num Items: " + _items.Count;
+            OnlyDisplayCurrentPage();
         }
     }
 
@@ -219,6 +220,15 @@ public class Inventory : MonoBehaviour
                     if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
                     OnlyDisplayCurrentPage();
                     Debug.Log("Removing used item from inventory");
+                }
+                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
+                int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+                //List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
+                if(initialPageIndex >= _items.Count)
+                {
+                    _currentPageNumber--;
+                    if (_currentPageNumber < 0) _currentPageNumber = 0;
+                    OnlyDisplayCurrentPage();
                 }
             }  
         }
@@ -586,7 +596,7 @@ public class Inventory : MonoBehaviour
         {
             lastPageIndex = _items.Count - 1;
         }
-
+        if (lastPageIndex < 0) return;
         List<GameObject> currentPage = _items.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
         if(_isOpen)
         {
