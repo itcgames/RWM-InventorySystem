@@ -140,4 +140,9 @@ public class PlayerScript : MonoBehaviour
             item.SetActive(false);
         }
     }
+
+    public void SaveToJson()
+    {
+        inventory.SaveToJson("json/", "test");
+    }
 }

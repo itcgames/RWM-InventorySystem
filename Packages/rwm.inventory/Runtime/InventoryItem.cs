@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
+using System;
+
 
 public class InventoryItem : MonoBehaviour
 {
@@ -122,4 +124,47 @@ public class InventoryItem : MonoBehaviour
             trans.SetParent(canvas.transform);
         }
     }
+
+    public ItemData CreateSaveData()
+    {
+        ItemData data = new ItemData();
+        data.itemTag = _itemTag;
+        data.description = _description;
+        data.displayNumberOfItems = _displayNumberOfItems;
+        data.numberOfItems = _numberOfItems;
+        data.maxItemsPerStack = _maxItemsPerStack;
+        data.isStackable = _isStackable;
+        data.sprite = _sprite.name;
+        //if(_image != null)
+        //{
+        //    data.image = _image.name;
+        //}
+        data.image = gameObject.GetComponent<Image>().name;
+        data.row = _row;
+        data.col = _col;
+        data.canvas = canvas.name;
+        data.useFunction = useFunction;
+        data.position = _position;
+        
+        return data;
+    }
+}
+
+[Serializable]
+public class ItemData
+{
+    public const string defaultString = "default";
+    public string itemTag = null;
+    public string description = null;
+    public bool displayNumberOfItems;
+    public uint numberOfItems = 0;
+    public uint maxItemsPerStack = 1;
+    public bool isStackable = true;
+    public string sprite;
+    public string image;
+    public int row;
+    public int col;
+    public string canvas;
+    public InventoryItem.Use useFunction;
+    public Vector3 position;
 }
