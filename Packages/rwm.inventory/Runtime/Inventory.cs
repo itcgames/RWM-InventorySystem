@@ -15,9 +15,6 @@ public class Inventory : MonoBehaviour
     [Tooltip("Set to true if you want the inventory to automatically draw. Set to false if you want to implement your own UI for the inventory.")]
     private bool _useDefaultDisplay;
     [SerializeField]
-    [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
-    private Font _font;
-    [SerializeField]
     [Tooltip("Set to true if you want to display info on the current item when the inventory is open. The corresponding text variables need to be passed in so that the inventory is able" +
         "to properly display the info")]
     private bool _displayCurrentItemInfo;
@@ -735,6 +732,7 @@ public class Inventory : MonoBehaviour
             json = File.ReadAllText(pathToJson + jsonName + ".json");
             data = JsonUtility.FromJson<InventorySaveData>(json);
         }
+        LoadFromSaveData(data);
         return true;
     }
 
@@ -786,7 +784,6 @@ public class Inventory : MonoBehaviour
         InventorySaveData data = new InventorySaveData();
         data.maxStackAmount = _maxStackAmount;
         data.useDefaultDisplay = _useDefaultDisplay;
-        data.font = _font.name;
         data.displayCurrentItemInfo = _displayCurrentItemInfo;
         data.currentNameOffset = _currentNameOffset;
         data.currentItemName = _currentItemName.name;
@@ -823,6 +820,57 @@ public class Inventory : MonoBehaviour
         data.spriteLocations = spriteLocations;
         data.name = gameObject.name;
         return data;
+    }
+
+    private void LoadFromSaveData(InventorySaveData saveData)
+    {
+        _maxStackAmount = saveData.maxStackAmount;
+        _useDefaultDisplay = saveData.useDefaultDisplay;
+        _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
+        _currentNameOffset = saveData.currentNameOffset;
+        GameObject canvas = GameObject.Find("Canvas");
+        List<GameObject> canvasChildren = new List<GameObject>();
+        for(int i = 0; i < canvas.transform.childCount; ++i)
+        {
+            canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+        }
+        GameObject obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
+        _currentItemName = obj.GetComponent<Text>();
+        obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
+        _currentItemDescription = obj.GetComponent<Text>();
+        _currentDescriptionOffset = saveData.currentDescriptionOffset;
+        obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
+        _currentItemAmount = obj.GetComponent<Text>();
+        _currentAmountOffset = saveData.currentAmountOffset;
+        
+        //data.items = new List<ItemData>();
+        //data.usedItems = new List<ItemData>();
+        //foreach (GameObject item in _items)
+        //{
+        //    data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData());
+        //}
+        //foreach (GameObject item in _usedItems)
+        //{
+        //    data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData());
+        //}
+        //data.isOpen = _isOpen;
+        //data.openCommand = _openCommand;
+        //data.closeCommand = _closeCommand;
+        //data.submitCommand = _submitCommand;
+        //data.currentlySelectedIndex = _currentlySelectedIndex;
+        //data.currentPageNumber = _currentPageNumber;
+        //data.totalNumberOfPages = _totalNumberOfPages;
+        //data.initialItemPosition = initialItemPosition;
+        //data.initialTransform = initialTransform.name;
+        //data.pagesText = pagesText.name;
+        //data.totalItemsText = totalItemsText.name;
+        //data.rowOffset = rowOffset;
+        //data.columnOffset = columnOffset;
+        //data.maxItemsPerRow = maxItemsPerRow;
+        //data.maxRows = maxRows;
+        //data.cursor = cursor.name;
+        //data.spriteLocations = spriteLocations;
+        //data.name = gameObject.name;
     }
 }
 

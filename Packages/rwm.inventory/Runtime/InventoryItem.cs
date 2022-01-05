@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Events;
 using System;
-
+using System.Linq;
 
 public class InventoryItem : MonoBehaviour
 {
@@ -140,7 +140,7 @@ public class InventoryItem : MonoBehaviour
         data.col = _col;
         data.canvas = canvas.name;
         data.useFunction = useFunction;
-        data.position = _position;       
+        data.position = _position;
         return data;
     }
 }
@@ -162,4 +162,5 @@ public class ItemData
     public string canvas;
     public InventoryItem.Use useFunction;
     public Vector3 position;
+    public List<string> scripts;
 }

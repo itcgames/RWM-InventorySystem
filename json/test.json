@@ -1,7 +1,7 @@
 {
     "maxStackAmount": 30,
     "useDefaultDisplay": true,
-    "font": "Arial",
+    "font": "",
     "displayCurrentItemInfo": true,
     "currentItemName": "CurrentItemName",
     "currentNameOffset": {
@@ -23,7 +23,7 @@
             "itemTag": "sword",
             "description": "Used to gain\nstrength",
             "displayNumberOfItems": true,
-            "numberOfItems": 3,
+            "numberOfItems": 5,
             "maxItemsPerStack": 5,
             "isStackable": true,
             "sprite": "white-sword",
@@ -35,7 +35,81 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "scripts": [
+                "sword(Clone) (InventoryItem)",
+                "sword(Clone) (Sword)",
+                "sword(Clone) (UnityEngine.UI.Image)"
+            ]
+        },
+        {
+            "itemTag": "sword",
+            "description": "Used to gain\nstrength",
+            "displayNumberOfItems": true,
+            "numberOfItems": 5,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "sprite": "white-sword",
+            "image": "sword(Clone)(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scripts": [
+                "sword(Clone)(Clone) (InventoryItem)",
+                "sword(Clone)(Clone) (Sword)",
+                "sword(Clone)(Clone) (UnityEngine.UI.Image)"
+            ]
+        },
+        {
+            "itemTag": "sword",
+            "description": "Used to gain\nstrength",
+            "displayNumberOfItems": true,
+            "numberOfItems": 5,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "sprite": "white-sword",
+            "image": "sword(Clone)(Clone)(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scripts": [
+                "sword(Clone)(Clone)(Clone) (InventoryItem)",
+                "sword(Clone)(Clone)(Clone) (Sword)",
+                "sword(Clone)(Clone)(Clone) (UnityEngine.UI.Image)"
+            ]
+        },
+        {
+            "itemTag": "sword",
+            "description": "Used to gain\nstrength",
+            "displayNumberOfItems": true,
+            "numberOfItems": 2,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "sprite": "white-sword",
+            "image": "sword(Clone)(Clone)(Clone)(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "scripts": [
+                "sword(Clone)(Clone)(Clone)(Clone) (InventoryItem)",
+                "sword(Clone)(Clone)(Clone)(Clone) (Sword)",
+                "sword(Clone)(Clone)(Clone)(Clone) (UnityEngine.UI.Image)"
+            ]
         }
     ],
     "usedItems": [],
