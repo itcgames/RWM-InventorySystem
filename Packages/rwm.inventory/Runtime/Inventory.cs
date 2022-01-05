@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
 public class Inventory : MonoBehaviour
 {
     [SerializeField]
@@ -52,6 +55,8 @@ public class Inventory : MonoBehaviour
     public int maxItemsPerRow = 0;
     public int maxRows = 0;
     public GameObject cursor;
+    [Tooltip("Folder that the images for the items are stored in so that when the inventory is loaded back in it can load the correct images.")]
+    public string spriteLocations = "not set";
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -707,4 +712,122 @@ public class Inventory : MonoBehaviour
         int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows);
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
+
+    public bool SaveToJson(string pathToJson, string jsonName, bool useDefaultLocation, bool forceOverwrite)
+    {
+        InventorySaveData oldData = null;
+        if(File.Exists(pathToJson + jsonName + ".json"))
+        {
+            string json;
+            if (useDefaultLocation)
+            {
+                json = File.ReadAllText(Application.persistentDataPath + jsonName + ".json");
+            }
+            else
+            {
+                json = File.ReadAllText(pathToJson + jsonName + ".json");
+            }
+            oldData = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        InventorySaveData saveData = GetSaveDataForInventory();
+        if (oldData != null && oldData.name != saveData.name && !forceOverwrite)
+        {
+            return false;
+        }
+        string inventory = JsonUtility.ToJson(saveData, true);
+        if(useDefaultLocation)
+        {
+            File.WriteAllText(Application.persistentDataPath + jsonName + ".json", inventory);
+        }
+        else
+        {
+            if(!Directory.Exists(pathToJson))
+            {
+                Directory.CreateDirectory(pathToJson);
+            }
+            File.WriteAllText(pathToJson + jsonName + ".json", inventory);
+        }
+        
+        return true;
+    }
+
+    private InventorySaveData GetSaveDataForInventory()
+    {
+        InventorySaveData data = new InventorySaveData();
+        data.maxStackAmount = _maxStackAmount;
+        data.useDefaultDisplay = _useDefaultDisplay;
+        data.font = _font.name;
+        data.displayCurrentItemInfo = _displayCurrentItemInfo;
+        data.currentNameOffset = _currentNameOffset;
+        data.currentItemName = _currentItemName.name;
+        data.currentItemDescription = _currentItemDescription.name;
+        data.currentDescriptionOffset = _currentDescriptionOffset;
+        data.currentItemAmount = _currentItemAmount.name;
+        data.currentAmountOffset = _currentAmountOffset;
+        data.items = new List<ItemData>();
+        data.usedItems = new List<ItemData>();
+        foreach (GameObject item in _items)
+        {
+            data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData());
+        }
+        foreach (GameObject item in _usedItems)
+        {
+            data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData());
+        }
+        data.isOpen = _isOpen;
+        data.openCommand = _openCommand;
+        data.closeCommand = _closeCommand;
+        data.submitCommand = _submitCommand;
+        data.currentlySelectedIndex = _currentlySelectedIndex;
+        data.currentPageNumber = _currentPageNumber;
+        data.totalNumberOfPages = _totalNumberOfPages;
+        data.initialItemPosition = initialItemPosition;
+        data.initialTransform = initialTransform.name;
+        data.pagesText = pagesText.name;
+        data.totalItemsText = totalItemsText.name;
+        data.rowOffset = rowOffset;
+        data.columnOffset = columnOffset;
+        data.maxItemsPerRow = maxItemsPerRow;
+        data.maxRows = maxRows;
+        data.cursor = cursor.name;
+        data.spriteLocations = spriteLocations;
+        data.name = gameObject.name;
+        return data;
+    }
+}
+
+[Serializable]
+class InventorySaveData
+{
+    public uint maxStackAmount = 0;
+    public bool useDefaultDisplay;
+    public string font;
+    public bool displayCurrentItemInfo;
+    public string currentItemName;
+    public Vector2 currentNameOffset;
+    public string currentItemDescription;
+    public Vector2 currentDescriptionOffset;
+    public string currentItemAmount;
+    public Vector2 currentAmountOffset;
+    public List<ItemData> items;
+    public List<ItemData> usedItems;
+    public bool isOpen;
+    public const string notSetString = "not set";
+    public string openCommand = notSetString;
+    public string closeCommand = notSetString;
+    public string submitCommand = notSetString;
+    public int currentlySelectedIndex = -1;
+    public int currentPageNumber = 0;
+    public int totalNumberOfPages = 0;
+    public Vector3 initialItemPosition = new Vector3(0, 0, 0);
+    public string initialTransform;
+    public string pagesText;
+    public string totalItemsText;
+    public int rowOffset = 10;
+    public int columnOffset = 10;
+    public int maxItemsPerRow = 0;
+    public int maxRows = 0;
+    public string cursor;
+    public string spriteLocations;
+    public string name;
 }
