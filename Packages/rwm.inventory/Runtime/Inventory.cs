@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -54,6 +55,8 @@ public class Inventory : MonoBehaviour
     public int maxItemsPerRow = 0;
     public int maxRows = 0;
     public GameObject cursor;
+    [Tooltip("Folder that the images for the items are stored in so that when the inventory is loaded back in it can load the correct images.")]
+    public string spriteLocations = "not set";
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -710,14 +713,41 @@ public class Inventory : MonoBehaviour
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
 
-    public bool SaveToJson(string pathToJson, string jsonName)
+    public bool SaveToJson(string pathToJson, string jsonName, bool useDefaultLocation, bool forceOverwrite)
     {
-        if(System.IO.File.Exists(pathToJson + jsonName + ".json"))
+        InventorySaveData oldData = null;
+        if(File.Exists(pathToJson + jsonName + ".json"))
         {
-
+            string json;
+            if (useDefaultLocation)
+            {
+                json = File.ReadAllText(Application.persistentDataPath + jsonName + ".json");
+            }
+            else
+            {
+                json = File.ReadAllText(pathToJson + jsonName + ".json");
+            }
+            oldData = JsonUtility.FromJson<InventorySaveData>(json);
         }
         InventorySaveData saveData = GetSaveDataForInventory();
-        string inventory = JsonUtility.ToJson(saveData);
+        if (oldData != null && oldData.name != saveData.name && !forceOverwrite)
+        {
+            return false;
+        }
+        string inventory = JsonUtility.ToJson(saveData, true);
+        if(useDefaultLocation)
+        {
+            File.WriteAllText(Application.persistentDataPath + jsonName + ".json", inventory);
+        }
+        else
+        {
+            if(!Directory.Exists(pathToJson))
+            {
+                Directory.CreateDirectory(pathToJson);
+            }
+            File.WriteAllText(pathToJson + jsonName + ".json", inventory);
+        }
+        
         return true;
     }
 
@@ -744,8 +774,6 @@ public class Inventory : MonoBehaviour
         {
             data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData());
         }
-        //data.items = _items;
-        //data.usedItems = _usedItems;
         data.isOpen = _isOpen;
         data.openCommand = _openCommand;
         data.closeCommand = _closeCommand;
@@ -762,6 +790,8 @@ public class Inventory : MonoBehaviour
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
         data.cursor = cursor.name;
+        data.spriteLocations = spriteLocations;
+        data.name = gameObject.name;
         return data;
     }
 }
@@ -798,4 +828,6 @@ class InventorySaveData
     public int maxItemsPerRow = 0;
     public int maxRows = 0;
     public string cursor;
+    public string spriteLocations;
+    public string name;
 }

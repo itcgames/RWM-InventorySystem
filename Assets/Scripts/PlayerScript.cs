@@ -143,6 +143,6 @@ public class PlayerScript : MonoBehaviour
 
     public void SaveToJson()
     {
-        inventory.SaveToJson("json/", "test");
+        inventory.SaveToJson("json/", "test", false, false);
     }
 }

@@ -135,17 +135,12 @@ public class InventoryItem : MonoBehaviour
         data.maxItemsPerStack = _maxItemsPerStack;
         data.isStackable = _isStackable;
         data.sprite = _sprite.name;
-        //if(_image != null)
-        //{
-        //    data.image = _image.name;
-        //}
         data.image = gameObject.GetComponent<Image>().name;
         data.row = _row;
         data.col = _col;
         data.canvas = canvas.name;
         data.useFunction = useFunction;
-        data.position = _position;
-        
+        data.position = _position;       
         return data;
     }
 }
