@@ -713,10 +713,40 @@ public class Inventory : MonoBehaviour
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
 
+    public bool LoadFromJsonFile(string pathToJson, string jsonName, bool usingDefaultLocation)
+    {
+        InventorySaveData data = null;
+        string json;
+        if(usingDefaultLocation)
+        {
+            if(!File.Exists(Application.persistentDataPath + jsonName + ".json"))
+            {
+                return false;
+            }
+            json = File.ReadAllText(Application.persistentDataPath + jsonName + ".json");
+            data = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        else
+        {
+            if (!File.Exists(pathToJson + jsonName + ".json"))
+            {
+                return false;
+            }
+            json = File.ReadAllText(pathToJson + jsonName + ".json");
+            data = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        return true;
+    }
+
+    public string SaveToJsonString(bool prettyPrint)
+    {
+        return JsonUtility.ToJson(GetSaveDataForInventory(), prettyPrint);
+    }
+
     public bool SaveToJson(string pathToJson, string jsonName, bool useDefaultLocation, bool forceOverwrite)
     {
         InventorySaveData oldData = null;
-        if(File.Exists(pathToJson + jsonName + ".json"))
+        if((File.Exists(pathToJson + jsonName + ".json") && !useDefaultLocation) || File.Exists(Application.persistentDataPath + jsonName + ".json"))
         {
             string json;
             if (useDefaultLocation)

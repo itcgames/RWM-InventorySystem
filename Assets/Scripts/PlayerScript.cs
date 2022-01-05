@@ -145,4 +145,9 @@ public class PlayerScript : MonoBehaviour
     {
         inventory.SaveToJson("json/", "test", false, false);
     }
+
+    public void LoadFromJson()
+    {
+        inventory.LoadFromJsonFile("json/", "test", false);
+    }
 }
