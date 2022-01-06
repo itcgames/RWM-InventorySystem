@@ -44,6 +44,9 @@ public class InventoryItem : MonoBehaviour
     public Use useFunction;
     private Vector3 _position;
 
+    [Tooltip("List the names of any of the other scripts attached to the item so that they can be loaded back in. Any data attached to these scripts won't be saved alongside the inventory.")]
+    public Type[] scripts;
+
     public Vector3 Position { get => _position; set => _position = value; }
 
     public bool DisplayAmountOfItems { get => _displayNumberOfItems; set => _displayNumberOfItems = value; }
@@ -147,7 +150,7 @@ public class InventoryItem : MonoBehaviour
         data.numberOfItems = _numberOfItems;
         data.maxItemsPerStack = _maxItemsPerStack;
         data.isStackable = _isStackable;
-        data.sprite = _sprite.name;
+        data.sprite = gameObject.GetComponent<Image>().sprite.name;
         data.image = gameObject.GetComponent<Image>().name;
         data.row = _row;
         data.col = _col;
@@ -157,9 +160,27 @@ public class InventoryItem : MonoBehaviour
         return data;
     }
 
-    public void LoadFromData(ItemData data)
+    public void LoadFromData(ItemData data, string spriteLocations)
     {
-
+        canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+        _itemTag = data.itemTag;
+        _description = data.description;
+        _displayNumberOfItems = data.displayNumberOfItems;
+        _numberOfItems = data.numberOfItems;
+        _maxItemsPerStack = data.maxItemsPerStack;
+        _isStackable = data.isStackable;
+        byte[] bytes = System.IO.File.ReadAllBytes(spriteLocations + data.sprite + ".png");
+        Texture2D texture = new Texture2D(1, 1);
+        texture.LoadImage(bytes);
+        _sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+        SetCanvasAsParent();
+        SetUpDisplay();
+        AddImage();
+        gameObject.SetActive(false);
+        _row = data.row;
+        _col = data.col;
+        _position = data.position;
+        gameObject.tag = "Item";
     }
 }
 
@@ -180,5 +201,4 @@ public class ItemData
     public string canvas;
     public InventoryItem.Use useFunction;
     public Vector3 position;
-    public List<string> scripts;
 }

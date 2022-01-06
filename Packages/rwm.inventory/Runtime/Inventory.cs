@@ -793,6 +793,7 @@ public class Inventory : MonoBehaviour
         data.currentAmountOffset = _currentAmountOffset;
         data.items = new List<ItemData>();
         data.usedItems = new List<ItemData>();
+        data.spriteLocations = spriteLocations;
         foreach (GameObject item in _items)
         {
             data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData());
@@ -817,7 +818,6 @@ public class Inventory : MonoBehaviour
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
         data.cursor = cursor.name;
-        data.spriteLocations = spriteLocations;
         data.name = gameObject.name;
         return data;
     }
@@ -828,13 +828,16 @@ public class Inventory : MonoBehaviour
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
         _currentNameOffset = saveData.currentNameOffset;
-        GameObject canvas = GameObject.Find("Canvas");
         List<GameObject> canvasChildren = new List<GameObject>();
-        for(int i = 0; i < canvas.transform.childCount; ++i)
+        GameObject canvas = GameObject.Find("Canvas");
+        for (int i = 0; i < canvas.transform.childCount; ++i)
         {
             canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
         }
-        GameObject obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
+        GameObject  obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
+        initialTransform = obj.transform;
+        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
+        obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
         _currentItemName = obj.GetComponent<Text>();
         obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
         _currentItemDescription = obj.GetComponent<Text>();
@@ -842,20 +845,25 @@ public class Inventory : MonoBehaviour
         obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
         _currentItemAmount = obj.GetComponent<Text>();
         _currentAmountOffset = saveData.currentAmountOffset;
+        _items.ForEach(x => Destroy(x));
         _items = new List<GameObject>();
-        foreach(ItemData item in saveData.items)
+        spriteLocations = saveData.spriteLocations;
+        foreach (ItemData item in saveData.items)
         {
-            GameObject newItem = new GameObject();
+            GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
             InventoryItem script = newItem.AddComponent<InventoryItem>();
-            script.LoadFromData(item);
+            script.SetParentTransform(initialTransform);
+            script.LoadFromData(item, spriteLocations);
             _items.Add(newItem);
         }
+        _usedItems.ForEach(x => Destroy(x));
         _usedItems = new List<GameObject>();
         foreach (ItemData item in saveData.usedItems)
         {
             GameObject newItem = new GameObject();
             InventoryItem script = newItem.AddComponent<InventoryItem>();
-            script.LoadFromData(item);
+            script.SetParentTransform(initialTransform);
+            script.LoadFromData(item, spriteLocations);
             _usedItems.Add(newItem);
         }
         _isOpen = saveData.isOpen;
@@ -866,9 +874,6 @@ public class Inventory : MonoBehaviour
         _currentPageNumber = saveData.currentPageNumber;
         _totalNumberOfPages = saveData.totalNumberOfPages;
         initialItemPosition = saveData.initialItemPosition;
-        obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
-        initialTransform = obj.transform;
-        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
         pagesText = obj.GetComponent<Text>();
         obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
         totalItemsText = obj.GetComponent<Text>();
@@ -878,7 +883,6 @@ public class Inventory : MonoBehaviour
         maxRows = saveData.maxRows;
         obj = canvasChildren.Find(x => x.name == saveData.cursor);
         cursor = obj;
-        spriteLocations = saveData.spriteLocations;
         name = saveData.name;
     }
 }
