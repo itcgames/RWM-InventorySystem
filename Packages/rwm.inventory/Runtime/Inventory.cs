@@ -874,6 +874,7 @@ public class Inventory : MonoBehaviour
         _currentPageNumber = saveData.currentPageNumber;
         _totalNumberOfPages = saveData.totalNumberOfPages;
         initialItemPosition = saveData.initialItemPosition;
+        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
         pagesText = obj.GetComponent<Text>();
         obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
         totalItemsText = obj.GetComponent<Text>();
