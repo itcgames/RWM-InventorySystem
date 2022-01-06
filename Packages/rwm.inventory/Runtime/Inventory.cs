@@ -15,9 +15,6 @@ public class Inventory : MonoBehaviour
     [Tooltip("Set to true if you want the inventory to automatically draw. Set to false if you want to implement your own UI for the inventory.")]
     private bool _useDefaultDisplay;
     [SerializeField]
-    [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
-    private Font _font;
-    [SerializeField]
     [Tooltip("Set to true if you want to display info on the current item when the inventory is open. The corresponding text variables need to be passed in so that the inventory is able" +
         "to properly display the info")]
     private bool _displayCurrentItemInfo;
@@ -713,10 +710,77 @@ public class Inventory : MonoBehaviour
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
 
+    private void HideOrShowInventory()
+    {
+        if(!_isOpen)
+        {
+            if(_useDefaultDisplay)
+            {
+                foreach(GameObject item in _items)
+                {
+                    item.SetActive(false);
+                }
+                _currentItemAmount.gameObject.SetActive(false);
+                _currentItemName.gameObject.SetActive(false);
+                _currentItemDescription.gameObject.SetActive(false);
+                cursor.gameObject.SetActive(false);
+                pagesText.gameObject.SetActive(false);
+                totalItemsText.gameObject.SetActive(false);
+                
+            }
+        }
+        else
+        {
+            if(_useDefaultDisplay)
+            {
+                _currentItemAmount.gameObject.SetActive(true);
+                _currentItemName.gameObject.SetActive(true);
+                _currentItemDescription.gameObject.SetActive(true);
+                cursor.gameObject.SetActive(true);
+                pagesText.gameObject.SetActive(true);
+                totalItemsText.gameObject.SetActive(true);
+                DisplayInfoOnCurrentItem();
+                OnlyDisplayCurrentPage();
+            }
+        }
+    }
+
+    public bool LoadFromJsonFile(string pathToJson, string jsonName, bool usingDefaultLocation)
+    {
+        InventorySaveData data = null;
+        string json;
+        if(usingDefaultLocation)
+        {
+            if(!File.Exists(Application.persistentDataPath + jsonName + ".json"))
+            {
+                return false;
+            }
+            json = File.ReadAllText(Application.persistentDataPath + jsonName + ".json");
+            data = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        else
+        {
+            if (!File.Exists(pathToJson + jsonName + ".json"))
+            {
+                return false;
+            }
+            json = File.ReadAllText(pathToJson + jsonName + ".json");
+            data = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        LoadFromSaveData(data);
+        HideOrShowInventory();
+        return true;
+    }
+
+    public string SaveToJsonString(bool prettyPrint)
+    {
+        return JsonUtility.ToJson(GetSaveDataForInventory(), prettyPrint);
+    }
+
     public bool SaveToJson(string pathToJson, string jsonName, bool useDefaultLocation, bool forceOverwrite)
     {
         InventorySaveData oldData = null;
-        if(File.Exists(pathToJson + jsonName + ".json"))
+        if((File.Exists(pathToJson + jsonName + ".json") && !useDefaultLocation) || File.Exists(Application.persistentDataPath + jsonName + ".json"))
         {
             string json;
             if (useDefaultLocation)
@@ -756,7 +820,6 @@ public class Inventory : MonoBehaviour
         InventorySaveData data = new InventorySaveData();
         data.maxStackAmount = _maxStackAmount;
         data.useDefaultDisplay = _useDefaultDisplay;
-        data.font = _font.name;
         data.displayCurrentItemInfo = _displayCurrentItemInfo;
         data.currentNameOffset = _currentNameOffset;
         data.currentItemName = _currentItemName.name;
@@ -766,6 +829,7 @@ public class Inventory : MonoBehaviour
         data.currentAmountOffset = _currentAmountOffset;
         data.items = new List<ItemData>();
         data.usedItems = new List<ItemData>();
+        data.spriteLocations = spriteLocations;
         foreach (GameObject item in _items)
         {
             data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData());
@@ -790,9 +854,73 @@ public class Inventory : MonoBehaviour
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
         data.cursor = cursor.name;
-        data.spriteLocations = spriteLocations;
         data.name = gameObject.name;
         return data;
+    }
+
+    private void LoadFromSaveData(InventorySaveData saveData)
+    {
+        _maxStackAmount = saveData.maxStackAmount;
+        _useDefaultDisplay = saveData.useDefaultDisplay;
+        _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
+        _currentNameOffset = saveData.currentNameOffset;
+        List<GameObject> canvasChildren = new List<GameObject>();
+        GameObject canvas = GameObject.Find("Canvas");
+        for (int i = 0; i < canvas.transform.childCount; ++i)
+        {
+            canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+        }
+        GameObject  obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
+        initialTransform = obj.transform;
+        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
+        obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
+        _currentItemName = obj.GetComponent<Text>();
+        obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
+        _currentItemDescription = obj.GetComponent<Text>();
+        _currentDescriptionOffset = saveData.currentDescriptionOffset;
+        obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
+        _currentItemAmount = obj.GetComponent<Text>();
+        _currentAmountOffset = saveData.currentAmountOffset;
+        _items.ForEach(x => Destroy(x));
+        _items = new List<GameObject>();
+        spriteLocations = saveData.spriteLocations;
+        foreach (ItemData item in saveData.items)
+        {
+            GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.SetParentTransform(initialTransform);
+            script.LoadFromData(item, spriteLocations);
+            _items.Add(newItem);
+        }
+        _usedItems.ForEach(x => Destroy(x));
+        _usedItems = new List<GameObject>();
+        foreach (ItemData item in saveData.usedItems)
+        {
+            GameObject newItem = new GameObject();
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.SetParentTransform(initialTransform);
+            script.LoadFromData(item, spriteLocations);
+            _usedItems.Add(newItem);
+        }
+        _isOpen = saveData.isOpen;
+        _openCommand = saveData.openCommand;
+        _closeCommand = saveData.closeCommand;
+        _submitCommand = saveData.submitCommand;
+        _currentlySelectedIndex = saveData.currentlySelectedIndex;
+        _currentPageNumber = saveData.currentPageNumber;
+        _totalNumberOfPages = saveData.totalNumberOfPages;
+        initialItemPosition = saveData.initialItemPosition;
+        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
+        pagesText = obj.GetComponent<Text>();
+        obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
+        totalItemsText = obj.GetComponent<Text>();
+        rowOffset = saveData.rowOffset;
+        columnOffset = saveData.columnOffset;
+        maxItemsPerRow = saveData.maxItemsPerRow;
+        maxRows = saveData.maxRows;
+        obj = canvasChildren.Find(x => x.name == saveData.cursor);
+        cursor = obj;
+        name = saveData.name;
     }
 }
 

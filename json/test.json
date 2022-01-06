@@ -1,7 +1,7 @@
 {
     "maxStackAmount": 30,
     "useDefaultDisplay": true,
-    "font": "Arial",
+    "font": "",
     "displayCurrentItemInfo": true,
     "currentItemName": "CurrentItemName",
     "currentNameOffset": {
@@ -23,11 +23,47 @@
             "itemTag": "sword",
             "description": "Used to gain\nstrength",
             "displayNumberOfItems": true,
-            "numberOfItems": 3,
+            "numberOfItems": 1,
             "maxItemsPerStack": 5,
             "isStackable": true,
             "sprite": "white-sword",
             "image": "sword(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        {
+            "itemTag": "potion",
+            "description": "Used to gain\nhealth if not \nat max.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "sprite": "potion",
+            "image": "potion(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            }
+        },
+        {
+            "itemTag": "shield",
+            "description": "Used to gain\nblock.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "sprite": "wooden-shield",
+            "image": "shield(Clone)",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -59,6 +95,6 @@
     "maxItemsPerRow": 5,
     "maxRows": 2,
     "cursor": "Cursor",
-    "spriteLocations": "not set",
+    "spriteLocations": "Assets/Sprites/",
     "name": "Inventory"
 }
