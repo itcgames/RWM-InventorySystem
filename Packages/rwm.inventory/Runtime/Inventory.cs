@@ -842,35 +842,44 @@ public class Inventory : MonoBehaviour
         obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
         _currentItemAmount = obj.GetComponent<Text>();
         _currentAmountOffset = saveData.currentAmountOffset;
-        
-        //data.items = new List<ItemData>();
-        //data.usedItems = new List<ItemData>();
-        //foreach (GameObject item in _items)
-        //{
-        //    data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData());
-        //}
-        //foreach (GameObject item in _usedItems)
-        //{
-        //    data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData());
-        //}
-        //data.isOpen = _isOpen;
-        //data.openCommand = _openCommand;
-        //data.closeCommand = _closeCommand;
-        //data.submitCommand = _submitCommand;
-        //data.currentlySelectedIndex = _currentlySelectedIndex;
-        //data.currentPageNumber = _currentPageNumber;
-        //data.totalNumberOfPages = _totalNumberOfPages;
-        //data.initialItemPosition = initialItemPosition;
-        //data.initialTransform = initialTransform.name;
-        //data.pagesText = pagesText.name;
-        //data.totalItemsText = totalItemsText.name;
-        //data.rowOffset = rowOffset;
-        //data.columnOffset = columnOffset;
-        //data.maxItemsPerRow = maxItemsPerRow;
-        //data.maxRows = maxRows;
-        //data.cursor = cursor.name;
-        //data.spriteLocations = spriteLocations;
-        //data.name = gameObject.name;
+        _items = new List<GameObject>();
+        foreach(ItemData item in saveData.items)
+        {
+            GameObject newItem = new GameObject();
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.LoadFromData(item);
+            _items.Add(newItem);
+        }
+        _usedItems = new List<GameObject>();
+        foreach (ItemData item in saveData.usedItems)
+        {
+            GameObject newItem = new GameObject();
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.LoadFromData(item);
+            _usedItems.Add(newItem);
+        }
+        _isOpen = saveData.isOpen;
+        _openCommand = saveData.openCommand;
+        _closeCommand = saveData.closeCommand;
+        _submitCommand = saveData.submitCommand;
+        _currentlySelectedIndex = saveData.currentlySelectedIndex;
+        _currentPageNumber = saveData.currentPageNumber;
+        _totalNumberOfPages = saveData.totalNumberOfPages;
+        initialItemPosition = saveData.initialItemPosition;
+        obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
+        initialTransform = obj.transform;
+        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
+        pagesText = obj.GetComponent<Text>();
+        obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
+        totalItemsText = obj.GetComponent<Text>();
+        rowOffset = saveData.rowOffset;
+        columnOffset = saveData.columnOffset;
+        maxItemsPerRow = saveData.maxItemsPerRow;
+        maxRows = saveData.maxRows;
+        obj = canvasChildren.Find(x => x.name == saveData.cursor);
+        cursor = obj;
+        spriteLocations = saveData.spriteLocations;
+        name = saveData.name;
     }
 }
 

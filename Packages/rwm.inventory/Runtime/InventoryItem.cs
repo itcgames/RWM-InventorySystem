@@ -125,6 +125,19 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
+    public void AddImage()
+    {
+        _image = gameObject.GetComponent<Image>();
+        if (_image == null)
+        {
+            _image = gameObject.AddComponent<Image>();
+            if (_sprite != null)
+            {
+                _image.sprite = _sprite;
+            }
+        }
+    }
+
     public ItemData CreateSaveData()
     {
         ItemData data = new ItemData();
@@ -142,6 +155,11 @@ public class InventoryItem : MonoBehaviour
         data.useFunction = useFunction;
         data.position = _position;
         return data;
+    }
+
+    public void LoadFromData(ItemData data)
+    {
+
     }
 }
 
