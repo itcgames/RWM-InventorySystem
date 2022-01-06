@@ -710,6 +710,41 @@ public class Inventory : MonoBehaviour
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
 
+    private void HideOrShowInventory()
+    {
+        if(!_isOpen)
+        {
+            if(_useDefaultDisplay)
+            {
+                foreach(GameObject item in _items)
+                {
+                    item.SetActive(false);
+                }
+                _currentItemAmount.gameObject.SetActive(false);
+                _currentItemName.gameObject.SetActive(false);
+                _currentItemDescription.gameObject.SetActive(false);
+                cursor.gameObject.SetActive(false);
+                pagesText.gameObject.SetActive(false);
+                totalItemsText.gameObject.SetActive(false);
+                
+            }
+        }
+        else
+        {
+            if(_useDefaultDisplay)
+            {
+                _currentItemAmount.gameObject.SetActive(true);
+                _currentItemName.gameObject.SetActive(true);
+                _currentItemDescription.gameObject.SetActive(true);
+                cursor.gameObject.SetActive(true);
+                pagesText.gameObject.SetActive(true);
+                totalItemsText.gameObject.SetActive(true);
+                DisplayInfoOnCurrentItem();
+                OnlyDisplayCurrentPage();
+            }
+        }
+    }
+
     public bool LoadFromJsonFile(string pathToJson, string jsonName, bool usingDefaultLocation)
     {
         InventorySaveData data = null;
@@ -733,6 +768,7 @@ public class Inventory : MonoBehaviour
             data = JsonUtility.FromJson<InventorySaveData>(json);
         }
         LoadFromSaveData(data);
+        HideOrShowInventory();
         return true;
     }
 

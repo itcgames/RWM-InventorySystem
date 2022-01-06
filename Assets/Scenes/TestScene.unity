@@ -504,7 +504,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -987,7 +987,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   m_Navigation:
-    m_Mode: 3
+    m_Mode: 0
     m_SelectOnUp: {fileID: 0}
     m_SelectOnDown: {fileID: 0}
     m_SelectOnLeft: {fileID: 0}
@@ -1318,7 +1318,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1177777239
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1335,7 +1335,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 18, y: -260}
+  m_AnchoredPosition: {x: 333, y: -260}
   m_SizeDelta: {x: 160, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1177777240
@@ -1531,8 +1531,6 @@ MonoBehaviour:
   _isStackable: 1
   _sprite: {fileID: 21300000, guid: b65c29acf5a7a8547a22e993c3019246, type: 3}
   canvas: {fileID: 1189184912}
-  scripts:
-  - Potion
 --- !u!222 &1204810336
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1706,8 +1704,6 @@ MonoBehaviour:
   _isStackable: 1
   _sprite: {fileID: 21300000, guid: 506e4acd3641a9847b6b7267e112b2cf, type: 3}
   canvas: {fileID: 1189184912}
-  scripts:
-  - Sword
 --- !u!4 &1383226727
 Transform:
   m_ObjectHideFlags: 0
@@ -2112,8 +2108,6 @@ MonoBehaviour:
   _isStackable: 1
   _sprite: {fileID: 21300000, guid: 1fa90ac48aa13da49a601dc02683c7bb, type: 3}
   canvas: {fileID: 1189184912}
-  scripts:
-  - Shield
 --- !u!4 &1854715218
 Transform:
   m_ObjectHideFlags: 0
