@@ -868,51 +868,77 @@ public class Inventory : MonoBehaviour
 
         List<GameObject> canvasChildren = new List<GameObject>();
         GameObject obj;
+        GameObject canvas = GameObject.Find("Canvas");
         if (_useDefaultDisplay)
         {
-            GameObject canvas = GameObject.Find("Canvas");
-            for (int i = 0; i < canvas.transform.childCount; ++i)
+            if(canvas != null)
             {
-                canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
-            }
-            obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
-            if (obj != null)
-            {
-                initialTransform = obj.transform;
-            }
-            else
-            {
-                errorsString += "Unable to load text for pages\n";
-            }
-            obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
-            if (obj != null)
-            {
-                _currentItemName = obj.GetComponent<Text>();
-            }
-            else
-            {
-                errorsString += "Unable to load text for pages\n";
-            }
-            
-            obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
-            if (obj != null)
-            {
-                _currentItemDescription = obj.GetComponent<Text>();
-            }
-            else
-            {
-                errorsString += "Unable to load text for pages\n";
-            }            
-            _currentDescriptionOffset = saveData.currentDescriptionOffset;
-            obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
-            if (obj != null)
-            {
-                _currentItemAmount = obj.GetComponent<Text>();
-            }
-            else
-            {
+                GameObject newTextObject;
+                for (int i = 0; i < canvas.transform.childCount; ++i)
+                {
+                    canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
+                if (obj != null)
+                {
+                    initialTransform = obj.transform;
+                }
+                else
+                {
+                    errorsString += "Unable to load text for pages\n";
+                    newTextObject = new GameObject(saveData.initialTransform);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    initialTransform = newTextObject.transform;
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
+                if (obj != null)
+                {
+                    _currentItemName = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to load text for pages\n";
+                    newTextObject = new GameObject(saveData.currentItemName);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentItemName = newText;
+                }
 
+                obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
+                if (obj != null)
+                {
+                    _currentItemDescription = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to load text for pages\n";
+                    newTextObject = new GameObject(saveData.currentItemDescription);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentItemDescription = newText;
+                }
+                _currentDescriptionOffset = saveData.currentDescriptionOffset;
+                obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
+                if (obj != null)
+                {
+                    _currentItemAmount = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to load text for pages\n";
+                    newTextObject = new GameObject(saveData.currentItemAmount);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentItemAmount = newText;
+                }
             }
+
            
             _currentAmountOffset = saveData.currentAmountOffset;
         }
@@ -925,6 +951,7 @@ public class Inventory : MonoBehaviour
             GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
             InventoryItem script = newItem.AddComponent<InventoryItem>();
             script.SetParentTransform(initialTransform);
+            item.usingDefaultDisplay = _useDefaultDisplay;
             bool success = script.LoadFromData(item, spriteLocations);
            
             if(success)
@@ -952,6 +979,7 @@ public class Inventory : MonoBehaviour
             GameObject newItem = new GameObject();
             InventoryItem script = newItem.AddComponent<InventoryItem>();
             script.SetParentTransform(initialTransform);
+            item.usingDefaultDisplay = _useDefaultDisplay;
             bool success = script.LoadFromData(item, spriteLocations);
             if (success)
             {
@@ -988,6 +1016,12 @@ public class Inventory : MonoBehaviour
             else
             {
                 errorsString += "Unable to load text for pages\n";
+                GameObject newTextObject = new GameObject(saveData.pagesText);
+                newTextObject.transform.SetParent(canvas.transform);
+                Text newText = newTextObject.AddComponent<Text>();
+                newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                newText.color = Color.black;
+                pagesText = newText;
             }
             obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
             if(obj != null)
@@ -997,6 +1031,12 @@ public class Inventory : MonoBehaviour
             else
             {
                 errorsString += "Unable to load text for total number of items\n";
+                GameObject newTextObject = new GameObject(saveData.totalItemsText);
+                newTextObject.transform.SetParent(canvas.transform);
+                Text newText = newTextObject.AddComponent<Text>();
+                newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                newText.color = Color.black;
+                totalItemsText = newText;
             }
         }
 
@@ -1017,8 +1057,10 @@ public class Inventory : MonoBehaviour
 
         if(!string.IsNullOrEmpty(errorsString))
         {
-            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "InventoryLogFile.txt";
+            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventoryLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
             StreamWriter writer = new StreamWriter(fileName, true);
+            writer.WriteLine("Date created: " + DateTime.Now.ToString("dd-MM-yyyy"));
+            writer.WriteLine("Time created: " + DateTime.Now.ToString("hh-mm-ss"));
             writer.Write(errorsString);
             writer.Close();
         }

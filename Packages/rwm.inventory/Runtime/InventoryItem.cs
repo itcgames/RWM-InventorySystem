@@ -5,6 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.Events;
 using System;
 using System.Linq;
+using System.IO;
 
 public class InventoryItem : MonoBehaviour
 {
@@ -206,10 +207,18 @@ public class InventoryItem : MonoBehaviour
                 if (string.IsNullOrEmpty(fileTypeOfSprite))
                 {
                     bytes = System.IO.File.ReadAllBytes(spriteLocations + data.sprite + ".png");
+                    if(!File.Exists(spriteLocations + data.sprite + ".png"))
+                    {
+                        throw new Exception("File not found");
+                    }
                 }
                 else
                 {
                     bytes = System.IO.File.ReadAllBytes(spriteLocations + data.sprite + fileTypeOfSprite);
+                    if (!File.Exists(spriteLocations + data.sprite + fileTypeOfSprite))
+                    {
+                        throw new Exception("File not found");
+                    }
                 }
                 Texture2D texture = new Texture2D(1, 1);
                 texture.LoadImage(bytes);
