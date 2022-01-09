@@ -38,6 +38,11 @@ public class InventoryItem : MonoBehaviour
     private int _row;
     private int _col;
 
+    public string loadingErrors;
+    public string savingErrors;
+
+    [Tooltip("This is the file extension of the sprite that is used to display the item in the default display. The dot before the extension should be included as well.")]
+    public string fileTypeOfSprite = ".png";
     public Canvas canvas;
     [SerializeField]
     public delegate bool Use();//should return true if succeeded, otherwise false
@@ -160,27 +165,75 @@ public class InventoryItem : MonoBehaviour
         return data;
     }
 
-    public void LoadFromData(ItemData data, string spriteLocations)
+    public bool LoadFromData(ItemData data, string spriteLocations)
     {
+        loadingErrors = "";
         canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+        if(canvas == null)
+        {
+            loadingErrors += "No Canvas Found For Item\n";
+        }
         _itemTag = data.itemTag;
-        _description = data.description;
-        _displayNumberOfItems = data.displayNumberOfItems;
-        _numberOfItems = data.numberOfItems;
-        _maxItemsPerStack = data.maxItemsPerStack;
-        _isStackable = data.isStackable;
-        byte[] bytes = System.IO.File.ReadAllBytes(spriteLocations + data.sprite + ".png");
-        Texture2D texture = new Texture2D(1, 1);
-        texture.LoadImage(bytes);
-        _sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
-        SetCanvasAsParent();
-        SetUpDisplay();
-        AddImage();
+        bool useDisplay = data.usingDefaultDisplay;
+        if(useDisplay)
+        {
+            _description = data.description;
+            if(string.IsNullOrEmpty(_description))
+            {
+                loadingErrors += "No description For Item\n";
+            }
+        }
+        try
+        {
+            //these are all just normal types so they should not be expected to cause an error but could be given weird values if the json has been messed with
+            _displayNumberOfItems = data.displayNumberOfItems;
+            _numberOfItems = data.numberOfItems;
+            _maxItemsPerStack = data.maxItemsPerStack;
+            _isStackable = data.isStackable;
+        }
+        catch (Exception e)
+        {
+            Debug.LogError(e.Message);
+            loadingErrors += e.Message + "\n";
+            return false;
+        }
+        if(data.usingDefaultDisplay)
+        {
+            //there's a possibility that the json file we're using does not have this sprite set or it is set to a different location
+            try
+            {
+                byte[] bytes;
+                if (string.IsNullOrEmpty(fileTypeOfSprite))
+                {
+                    bytes = System.IO.File.ReadAllBytes(spriteLocations + data.sprite + ".png");
+                }
+                else
+                {
+                    bytes = System.IO.File.ReadAllBytes(spriteLocations + data.sprite + fileTypeOfSprite);
+                }
+                Texture2D texture = new Texture2D(1, 1);
+                texture.LoadImage(bytes);
+                _sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                SetCanvasAsParent();
+                SetUpDisplay();
+                AddImage();
+            }
+            catch(Exception e)
+            {
+                Debug.LogError(e.Message);
+                loadingErrors += e.Message + "\n";
+                loadingErrors += "This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the def" +
+                    "ault location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself\n";
+                return false;
+            }
+        }
+
         gameObject.SetActive(false);
         _row = data.row;
         _col = data.col;
         _position = data.position;
         gameObject.tag = "Item";
+        return true;
     }
 }
 
@@ -194,6 +247,7 @@ public class ItemData
     public uint numberOfItems = 0;
     public uint maxItemsPerStack = 1;
     public bool isStackable = true;
+    public bool usingDefaultDisplay = false;
     public string sprite;
     public string image;
     public int row;

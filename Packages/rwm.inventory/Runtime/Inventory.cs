@@ -860,6 +860,7 @@ public class Inventory : MonoBehaviour
 
     private void LoadFromSaveData(InventorySaveData saveData)
     {
+        string errorsString = "";
         _maxStackAmount = saveData.maxStackAmount;
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
@@ -884,23 +885,48 @@ public class Inventory : MonoBehaviour
         _items.ForEach(x => Destroy(x));
         _items = new List<GameObject>();
         spriteLocations = saveData.spriteLocations;
+        int currentIndex = 0;
         foreach (ItemData item in saveData.items)
         {
             GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
             InventoryItem script = newItem.AddComponent<InventoryItem>();
             script.SetParentTransform(initialTransform);
-            script.LoadFromData(item, spriteLocations);
-            _items.Add(newItem);
+            bool success = script.LoadFromData(item, spriteLocations);
+           
+            if(success)
+            {
+                _items.Add(newItem);
+            }
+            else
+            {
+                //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
+                errorsString += script.loadingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the regular items array\n";
+                Debug.LogError("Error loading item at index: " + currentIndex + " for the regular items array\n");
+            }
+            currentIndex++;
         }
         _usedItems.ForEach(x => Destroy(x));
         _usedItems = new List<GameObject>();
+        currentIndex = 0;
         foreach (ItemData item in saveData.usedItems)
         {
             GameObject newItem = new GameObject();
             InventoryItem script = newItem.AddComponent<InventoryItem>();
             script.SetParentTransform(initialTransform);
-            script.LoadFromData(item, spriteLocations);
-            _usedItems.Add(newItem);
+            bool success = script.LoadFromData(item, spriteLocations);
+            if (success)
+            {
+                _usedItems.Add(newItem);
+            }
+            else
+            {
+                //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
+                errorsString += script.loadingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                Debug.LogError("Error loading item at index: " + currentIndex + " for the used items array\n");
+            }
+            currentIndex++;
         }
         _isOpen = saveData.isOpen;
         _openCommand = saveData.openCommand;
