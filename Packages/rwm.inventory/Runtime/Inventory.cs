@@ -903,6 +903,10 @@ public class Inventory : MonoBehaviour
                 errorsString += script.loadingErrors;
                 errorsString += "Error loading item at index: " + currentIndex + " for the regular items array\n";
                 Debug.LogError("Error loading item at index: " + currentIndex + " for the regular items array\n");
+                if(newItem.GetComponent<InventoryItem>().Sprite != null)
+                {
+                    _items.Add(newItem);
+                }
             }
             currentIndex++;
         }

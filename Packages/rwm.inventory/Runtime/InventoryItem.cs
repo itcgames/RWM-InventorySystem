@@ -224,6 +224,23 @@ public class InventoryItem : MonoBehaviour
                 loadingErrors += e.Message + "\n";
                 loadingErrors += "This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the def" +
                     "ault location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself\n";
+                try
+                {
+                    byte[] bytes;
+                    bytes = System.IO.File.ReadAllBytes(spriteLocations + "ErrorSprite.png");
+                    Texture2D texture = new Texture2D(1, 1);
+                    texture.LoadImage(bytes);
+                    _sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                    SetCanvasAsParent();
+                    SetUpDisplay();
+                    AddImage();
+                }
+                catch(Exception error)
+                {
+                    Debug.LogError(e.Message);
+                    loadingErrors += e.Message + "\n";
+                    loadingErrors += "Unable to load error sprite.\n";
+                }
                 return false;
             }
         }
