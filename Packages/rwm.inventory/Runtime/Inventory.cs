@@ -865,23 +865,57 @@ public class Inventory : MonoBehaviour
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
         _currentNameOffset = saveData.currentNameOffset;
+
         List<GameObject> canvasChildren = new List<GameObject>();
-        GameObject canvas = GameObject.Find("Canvas");
-        for (int i = 0; i < canvas.transform.childCount; ++i)
+        GameObject obj;
+        if (_useDefaultDisplay)
         {
-            canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+            GameObject canvas = GameObject.Find("Canvas");
+            for (int i = 0; i < canvas.transform.childCount; ++i)
+            {
+                canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+            }
+            obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
+            if (obj != null)
+            {
+                initialTransform = obj.transform;
+            }
+            else
+            {
+                errorsString += "Unable to load text for pages\n";
+            }
+            obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
+            if (obj != null)
+            {
+                _currentItemName = obj.GetComponent<Text>();
+            }
+            else
+            {
+                errorsString += "Unable to load text for pages\n";
+            }
+            
+            obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
+            if (obj != null)
+            {
+                _currentItemDescription = obj.GetComponent<Text>();
+            }
+            else
+            {
+                errorsString += "Unable to load text for pages\n";
+            }            
+            _currentDescriptionOffset = saveData.currentDescriptionOffset;
+            obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
+            if (obj != null)
+            {
+                _currentItemAmount = obj.GetComponent<Text>();
+            }
+            else
+            {
+
+            }
+           
+            _currentAmountOffset = saveData.currentAmountOffset;
         }
-        GameObject  obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
-        initialTransform = obj.transform;
-        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
-        obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
-        _currentItemName = obj.GetComponent<Text>();
-        obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
-        _currentItemDescription = obj.GetComponent<Text>();
-        _currentDescriptionOffset = saveData.currentDescriptionOffset;
-        obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
-        _currentItemAmount = obj.GetComponent<Text>();
-        _currentAmountOffset = saveData.currentAmountOffset;
         _items.ForEach(x => Destroy(x));
         _items = new List<GameObject>();
         spriteLocations = saveData.spriteLocations;
@@ -929,6 +963,10 @@ public class Inventory : MonoBehaviour
                 errorsString += script.loadingErrors;
                 errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
                 Debug.LogError("Error loading item at index: " + currentIndex + " for the used items array\n");
+                if (newItem.GetComponent<InventoryItem>().Sprite != null)
+                {
+                    _items.Add(newItem);
+                }
             }
             currentIndex++;
         }
@@ -939,18 +977,51 @@ public class Inventory : MonoBehaviour
         _currentlySelectedIndex = saveData.currentlySelectedIndex;
         _currentPageNumber = saveData.currentPageNumber;
         _totalNumberOfPages = saveData.totalNumberOfPages;
-        initialItemPosition = saveData.initialItemPosition;
-        obj = canvasChildren.Find(x => x.name == saveData.pagesText);
-        pagesText = obj.GetComponent<Text>();
-        obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
-        totalItemsText = obj.GetComponent<Text>();
+        if(_useDefaultDisplay)
+        {
+            initialItemPosition = saveData.initialItemPosition;
+            obj = canvasChildren.Find(x => x.name == saveData.pagesText);
+            if(obj != null)
+            {
+                pagesText = obj.GetComponent<Text>();
+            }
+            else
+            {
+                errorsString += "Unable to load text for pages\n";
+            }
+            obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
+            if(obj != null)
+            {
+                totalItemsText = obj.GetComponent<Text>();
+            }
+            else
+            {
+                errorsString += "Unable to load text for total number of items\n";
+            }
+        }
+
         rowOffset = saveData.rowOffset;
         columnOffset = saveData.columnOffset;
         maxItemsPerRow = saveData.maxItemsPerRow;
         maxRows = saveData.maxRows;
         obj = canvasChildren.Find(x => x.name == saveData.cursor);
-        cursor = obj;
+        if(obj != null && _useDefaultDisplay)
+        {
+            cursor = obj;
+        }
+        else
+        {
+            errorsString += "Unable to load cursor\n";
+        }
         name = saveData.name;
+
+        if(!string.IsNullOrEmpty(errorsString))
+        {
+            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "InventoryLogFile.txt";
+            StreamWriter writer = new StreamWriter(fileName, true);
+            writer.Write(errorsString);
+            writer.Close();
+        }
     }
 }
 
