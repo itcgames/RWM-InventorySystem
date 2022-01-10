@@ -3,17 +3,17 @@
     "useDefaultDisplay": true,
     "font": "",
     "displayCurrentItemInfo": true,
-    "currentItemName": "CurrentItemName12",
+    "currentItemName": "CurrentItemName",
     "currentNameOffset": {
         "x": 0.0,
         "y": 150.0
     },
-    "currentItemDescription": "CurrentItemDescription3",
+    "currentItemDescription": "CurrentItemDescription",
     "currentDescriptionOffset": {
         "x": 0.0,
         "y": 115.0
     },
-    "currentItemAmount": "CurrentItemAmount4",
+    "currentItemAmount": "CurrentItemAmount",
     "currentAmountOffset": {
         "x": 0.0,
         "y": 50.0
@@ -27,46 +27,8 @@
             "maxItemsPerStack": 5,
             "isStackable": true,
             "usingDefaultDisplay": false,
-            "sprite": "white-sword123",
+            "sprite": "white-sword",
             "image": "sword(Clone)",
-            "row": 0,
-            "col": 0,
-            "canvas": "Canvas",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
-        },
-        {
-            "itemTag": "potion",
-            "description": "Used to gain\nhealth if not \nat max.",
-            "displayNumberOfItems": true,
-            "numberOfItems": 1,
-            "maxItemsPerStack": 1,
-            "isStackable": true,
-            "usingDefaultDisplay": false,
-            "sprite": "potion1",
-            "image": "potion(Clone)",
-            "row": 0,
-            "col": 0,
-            "canvas": "Canvas",
-            "position": {
-                "x": 0.0,
-                "y": 0.0,
-                "z": 0.0
-            }
-        },
-        {
-            "itemTag": "shield",
-            "description": "Used to gain\nblock.",
-            "displayNumberOfItems": true,
-            "numberOfItems": 1,
-            "maxItemsPerStack": 1,
-            "isStackable": true,
-            "usingDefaultDisplay": false,
-            "sprite": "wooden-shield3",
-            "image": "shield(Clone)",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -78,7 +40,7 @@
         }
     ],
     "usedItems": [],
-    "isOpen": true,
+    "isOpen": false,
     "openCommand": "not set",
     "closeCommand": "not set",
     "submitCommand": "not set",
@@ -90,14 +52,14 @@
         "y": 0.0,
         "z": 0.0
     },
-    "initialTransform": "Display4",
-    "pagesText": "Pages4",
-    "totalItemsText": "TotalNumberOfItems4",
+    "initialTransform": "Display",
+    "pagesText": "Pages",
+    "totalItemsText": "TotalNumberOfItems",
     "rowOffset": 50,
     "columnOffset": -50,
     "maxItemsPerRow": 5,
     "maxRows": 2,
-    "cursor": "Cursor4",
+    "cursor": "Cursor",
     "spriteLocations": "Assets/Sprites/",
     "name": "Inventory"
 }

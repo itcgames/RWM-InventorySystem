@@ -534,8 +534,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1889821995}
-        m_MethodName: LoadFromJson
+      - m_Target: {fileID: 627402342}
+        m_MethodName: LoadFromJsonFile
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -921,6 +921,12 @@ MonoBehaviour:
   maxRows: 2
   cursor: {fileID: 241117414}
   spriteLocations: Assets/Sprites/
+  useDefaultLocation: 0
+  jsonName: test
+  pathToJson: json/
+  forceOverwrite: 1
+  pathToLoadJsonFrom: json/
+  jsonToLoadFrom: test
 --- !u!4 &627402343
 Transform:
   m_ObjectHideFlags: 0
@@ -1017,7 +1023,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1889821995}
+      - m_Target: {fileID: 627402342}
         m_MethodName: SaveToJson
         m_Mode: 1
         m_Arguments:
@@ -1530,6 +1536,9 @@ MonoBehaviour:
   _maxItemsPerStack: 1
   _isStackable: 1
   _sprite: {fileID: 21300000, guid: b65c29acf5a7a8547a22e993c3019246, type: 3}
+  loadingErrors: 
+  savingErrors: 
+  fileTypeOfSprite: .png
   canvas: {fileID: 1189184912}
 --- !u!222 &1204810336
 CanvasRenderer:
@@ -1703,6 +1712,9 @@ MonoBehaviour:
   _maxItemsPerStack: 5
   _isStackable: 1
   _sprite: {fileID: 21300000, guid: 506e4acd3641a9847b6b7267e112b2cf, type: 3}
+  loadingErrors: 
+  savingErrors: 
+  fileTypeOfSprite: .png
   canvas: {fileID: 1189184912}
 --- !u!4 &1383226727
 Transform:
@@ -2107,6 +2119,9 @@ MonoBehaviour:
   _maxItemsPerStack: 1
   _isStackable: 1
   _sprite: {fileID: 21300000, guid: 1fa90ac48aa13da49a601dc02683c7bb, type: 3}
+  loadingErrors: 
+  savingErrors: 
+  fileTypeOfSprite: .png
   canvas: {fileID: 1189184912}
 --- !u!4 &1854715218
 Transform:

@@ -54,6 +54,13 @@ public class Inventory : MonoBehaviour
     public GameObject cursor;
     [Tooltip("Folder that the images for the items are stored in so that when the inventory is loaded back in it can load the correct images.")]
     public string spriteLocations = "not set";
+    public bool useDefaultLocation;
+    public string jsonName;
+    public string pathToJson;
+    public bool forceOverwrite;
+    public string pathToLoadJsonFrom;
+    public string jsonToLoadFrom;
+
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -745,31 +752,33 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    public bool LoadFromJsonFile(string pathToJson, string jsonName, bool usingDefaultLocation)
+    public void LoadFromJsonFile()
     {
         InventorySaveData data = null;
         string json;
-        if(usingDefaultLocation)
+        if(useDefaultLocation)
         {
-            if(!File.Exists(Application.persistentDataPath + jsonName + ".json"))
+            if(!File.Exists(Application.persistentDataPath + jsonToLoadFrom + ".json"))
             {
-                return false;
+                Debug.LogError("Tried to load json from persistent path but the file could not be found.");
+                return;
             }
-            json = File.ReadAllText(Application.persistentDataPath + jsonName + ".json");
+            json = File.ReadAllText(Application.persistentDataPath + jsonToLoadFrom + ".json");
             data = JsonUtility.FromJson<InventorySaveData>(json);
         }
         else
         {
-            if (!File.Exists(pathToJson + jsonName + ".json"))
+            if (!File.Exists(pathToLoadJsonFrom + jsonToLoadFrom + ".json"))
             {
-                return false;
+                Debug.LogError("Tried to load json from the provided path but the file could not be found or the directory did not exist.");
+                return;
             }
-            json = File.ReadAllText(pathToJson + jsonName + ".json");
+            json = File.ReadAllText(pathToLoadJsonFrom + jsonToLoadFrom + ".json");
             data = JsonUtility.FromJson<InventorySaveData>(json);
         }
         LoadFromSaveData(data);
         HideOrShowInventory();
-        return true;
+        return;
     }
 
     public string SaveToJsonString(bool prettyPrint)
@@ -777,8 +786,18 @@ public class Inventory : MonoBehaviour
         return JsonUtility.ToJson(GetSaveDataForInventory(), prettyPrint);
     }
 
-    public bool SaveToJson(string pathToJson, string jsonName, bool useDefaultLocation, bool forceOverwrite)
+    public void SaveToJson()
     {
+        if(string.IsNullOrEmpty(pathToJson) && !useDefaultLocation)
+        {
+            Debug.LogError("No Path Given to where the json should be stored and the default path is not being used.");
+            return;
+        }
+        if(string.IsNullOrEmpty(jsonName))
+        {
+            Debug.LogError("No name given to the json file that should be created. No File has been created.");
+            return;
+        }
         InventorySaveData oldData = null;
         if((File.Exists(pathToJson + jsonName + ".json") && !useDefaultLocation) || File.Exists(Application.persistentDataPath + jsonName + ".json"))
         {
@@ -796,7 +815,8 @@ public class Inventory : MonoBehaviour
         InventorySaveData saveData = GetSaveDataForInventory();
         if (oldData != null && oldData.name != saveData.name && !forceOverwrite)
         {
-            return false;
+            Debug.LogWarning("No Data Saved. File that was tried to be used for saving already stores inventory of different name and overwriting has not been enabled for this inventory.");
+            return;
         }
         string inventory = JsonUtility.ToJson(saveData, true);
         if(useDefaultLocation)
@@ -812,7 +832,7 @@ public class Inventory : MonoBehaviour
             File.WriteAllText(pathToJson + jsonName + ".json", inventory);
         }
         
-        return true;
+        return;
     }
 
     private InventorySaveData GetSaveDataForInventory()

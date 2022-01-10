@@ -141,29 +141,4 @@ public class PlayerScript : MonoBehaviour
         }
     }
 
-    public void SaveToJson()
-    {
-        inventory.SaveToJson("json/", "test", false, false);
-    }
-
-    public void LoadFromJson()
-    {
-        inventory.LoadFromJsonFile("json/", "test", false);
-        foreach(GameObject item in inventory.Items)
-        {
-            InventoryItem script = item.GetComponent<InventoryItem>();
-            if(script.Name == "potion")
-            {
-                item.AddComponent<Potion>();
-            }
-            else if(script.Name == "sword")
-            {
-                item.AddComponent<Sword>();
-            }
-            else if(script.Name == "shield")
-            {
-                item.AddComponent<Shield>();
-            }
-        }
-    }
 }
