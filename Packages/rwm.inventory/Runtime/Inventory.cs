@@ -817,26 +817,96 @@ public class Inventory : MonoBehaviour
 
     private InventorySaveData GetSaveDataForInventory()
     {
+        string errorsString = "";
         InventorySaveData data = new InventorySaveData();
         data.maxStackAmount = _maxStackAmount;
         data.useDefaultDisplay = _useDefaultDisplay;
         data.displayCurrentItemInfo = _displayCurrentItemInfo;
         data.currentNameOffset = _currentNameOffset;
-        data.currentItemName = _currentItemName.name;
-        data.currentItemDescription = _currentItemDescription.name;
+        if(_useDefaultDisplay)
+        {
+            if(_currentItemName != null)
+            {
+                data.currentItemName = _currentItemName.name;
+            }
+            else
+            {
+                errorsString += "Current Item Name Text Does Not Exist.\n";
+            }
+            if(_currentItemDescription != null)
+            {
+                data.currentItemDescription = _currentItemDescription.name;
+            }
+            else
+            {
+                errorsString += "Current Item Description Text Does Not Exist.\n";
+            }
+            if(initialTransform != null)
+            {
+                data.initialTransform = initialTransform.name;
+            }
+            else
+            {
+                errorsString += "Initial Transform Does Not Exist.\n";
+            }
+            
+            data.spriteLocations = spriteLocations;
+            data.initialItemPosition = initialItemPosition;
+            if(pagesText != null)
+            {
+                data.pagesText = pagesText.name;
+            }
+            else
+            {
+                errorsString += "Pages Text Does Not Exist.\n";
+            }
+            if(totalItemsText != null)
+            {
+                data.totalItemsText = totalItemsText.name;
+            }
+            else
+            {
+                errorsString += "Total Items Text Does Not Exist.\n";
+            }
+            if(cursor != null)
+            {
+                data.cursor = cursor.name;
+            }
+            else
+            {
+                errorsString += "Cursor Does Not Exist.\n";
+            }
+            data.rowOffset = rowOffset;
+            data.columnOffset = columnOffset;
+        }
         data.currentDescriptionOffset = _currentDescriptionOffset;
         data.currentItemAmount = _currentItemAmount.name;
         data.currentAmountOffset = _currentAmountOffset;
         data.items = new List<ItemData>();
         data.usedItems = new List<ItemData>();
-        data.spriteLocations = spriteLocations;
+        int currentIndex = 0;
         foreach (GameObject item in _items)
         {
-            data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData());
+            data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+            if(!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            {
+                errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the items array\n";
+                Debug.LogError("Error loading item at index: " + currentIndex + " for the items array\n");
+            }
+            currentIndex++;
         }
+        currentIndex = 0;
         foreach (GameObject item in _usedItems)
         {
-            data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData());
+            data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+            if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            {
+                errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                Debug.LogError("Error loading item at index: " + currentIndex + " for the used items array\n");
+            }
+            currentIndex++;
         }
         data.isOpen = _isOpen;
         data.openCommand = _openCommand;
@@ -845,16 +915,18 @@ public class Inventory : MonoBehaviour
         data.currentlySelectedIndex = _currentlySelectedIndex;
         data.currentPageNumber = _currentPageNumber;
         data.totalNumberOfPages = _totalNumberOfPages;
-        data.initialItemPosition = initialItemPosition;
-        data.initialTransform = initialTransform.name;
-        data.pagesText = pagesText.name;
-        data.totalItemsText = totalItemsText.name;
-        data.rowOffset = rowOffset;
-        data.columnOffset = columnOffset;
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
-        data.cursor = cursor.name;
         data.name = gameObject.name;
+        if (!string.IsNullOrEmpty(errorsString))
+        {
+            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventorySavingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
+            StreamWriter writer = new StreamWriter(fileName, true);
+            writer.WriteLine("Date created: " + DateTime.Now.ToString("dd-MM-yyyy"));
+            writer.WriteLine("Time created: " + DateTime.Now.ToString("hh-mm-ss"));
+            writer.Write(errorsString);
+            writer.Close();
+        }
         return data;
     }
 
@@ -885,7 +957,7 @@ public class Inventory : MonoBehaviour
                 }
                 else
                 {
-                    errorsString += "Unable to load text for pages\n";
+                    errorsString += "Unable to load initial transform\n";
                     newTextObject = new GameObject(saveData.initialTransform);
                     newTextObject.transform.SetParent(canvas.transform);
                     initialTransform = newTextObject.transform;
@@ -897,7 +969,7 @@ public class Inventory : MonoBehaviour
                 }
                 else
                 {
-                    errorsString += "Unable to load text for pages\n";
+                    errorsString += "Unable to current item name\n";
                     newTextObject = new GameObject(saveData.currentItemName);
                     newTextObject.transform.SetParent(canvas.transform);
                     Text newText = newTextObject.AddComponent<Text>();
@@ -913,7 +985,7 @@ public class Inventory : MonoBehaviour
                 }
                 else
                 {
-                    errorsString += "Unable to load text for pages\n";
+                    errorsString += "Unable to current item description\n";
                     newTextObject = new GameObject(saveData.currentItemDescription);
                     newTextObject.transform.SetParent(canvas.transform);
                     Text newText = newTextObject.AddComponent<Text>();
@@ -929,7 +1001,7 @@ public class Inventory : MonoBehaviour
                 }
                 else
                 {
-                    errorsString += "Unable to load text for pages\n";
+                    errorsString += "Unable to load current item amount\n";
                     newTextObject = new GameObject(saveData.currentItemAmount);
                     newTextObject.transform.SetParent(canvas.transform);
                     Text newText = newTextObject.AddComponent<Text>();
@@ -1057,7 +1129,7 @@ public class Inventory : MonoBehaviour
 
         if(!string.IsNullOrEmpty(errorsString))
         {
-            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventoryLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
+            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventoryLoadingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
             StreamWriter writer = new StreamWriter(fileName, true);
             writer.WriteLine("Date created: " + DateTime.Now.ToString("dd-MM-yyyy"));
             writer.WriteLine("Time created: " + DateTime.Now.ToString("hh-mm-ss"));

@@ -147,8 +147,9 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
-    public ItemData CreateSaveData()
+    public ItemData CreateSaveData(bool usingDefaultDisplay)
     {
+        savingErrors = "";
         ItemData data = new ItemData();
         data.itemTag = _itemTag;
         data.description = _description;
@@ -156,13 +157,37 @@ public class InventoryItem : MonoBehaviour
         data.numberOfItems = _numberOfItems;
         data.maxItemsPerStack = _maxItemsPerStack;
         data.isStackable = _isStackable;
-        data.sprite = gameObject.GetComponent<Image>().sprite.name;
-        data.image = gameObject.GetComponent<Image>().name;
+        if(usingDefaultDisplay)
+        {
+            if(gameObject.GetComponent<Image>().sprite != null)
+            {
+                data.sprite = gameObject.GetComponent<Image>().sprite.name;
+            }
+            else
+            {
+                savingErrors += "Sprite Does Not Exist\n";
+            }
+            if(gameObject.GetComponent<Image>() != null)
+            {
+                data.image = gameObject.GetComponent<Image>().name;
+            }
+            else
+            {
+                savingErrors += "Image Does Not Exist\n";
+            }
+            if(canvas != null)
+            {
+                data.canvas = canvas.name;
+            }
+            else
+            {
+                savingErrors += "Canvas Does Not Exist.\n";
+            }
+            data.position = _position;
+        }
         data.row = _row;
         data.col = _col;
-        data.canvas = canvas.name;
         data.useFunction = useFunction;
-        data.position = _position;
         return data;
     }
 
