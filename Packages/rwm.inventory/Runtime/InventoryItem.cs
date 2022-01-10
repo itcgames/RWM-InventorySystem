@@ -228,6 +228,11 @@ public class InventoryItem : MonoBehaviour
             //there's a possibility that the json file we're using does not have this sprite set or it is set to a different location
             try
             {
+                if(string.IsNullOrEmpty(data.sprite))
+                {
+                    throw new Exception("Sprite Not Set To A Valid Image.");
+                }
+
                 byte[] bytes;
                 if (string.IsNullOrEmpty(fileTypeOfSprite))
                 {
