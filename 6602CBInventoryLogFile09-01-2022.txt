@@ -1,0 +1,10 @@
+Date and time created: 09-01-2022_05-46-58
+Could not find file "E:\college\Real World Sim\RWM-InventorySystem\Assets\Sprites\white-sword123.png"
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 0 for the regular items array
+Could not find file "E:\college\Real World Sim\RWM-InventorySystem\Assets\Sprites\potion1.png"
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 1 for the regular items array
+Could not find file "E:\college\Real World Sim\RWM-InventorySystem\Assets\Sprites\wooden-shield3.png"
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 2 for the regular items array

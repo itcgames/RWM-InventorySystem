@@ -3,17 +3,17 @@
     "useDefaultDisplay": true,
     "font": "",
     "displayCurrentItemInfo": true,
-    "currentItemName": "CurrentItemName",
+    "currentItemName": "CurrentItemName12",
     "currentNameOffset": {
         "x": 0.0,
         "y": 150.0
     },
-    "currentItemDescription": "CurrentItemDescription",
+    "currentItemDescription": "CurrentItemDescription3",
     "currentDescriptionOffset": {
         "x": 0.0,
         "y": 115.0
     },
-    "currentItemAmount": "CurrentItemAmount",
+    "currentItemAmount": "CurrentItemAmount4",
     "currentAmountOffset": {
         "x": 0.0,
         "y": 50.0
@@ -26,7 +26,8 @@
             "numberOfItems": 1,
             "maxItemsPerStack": 5,
             "isStackable": true,
-            "sprite": "white-sword",
+            "usingDefaultDisplay": false,
+            "sprite": "white-sword123",
             "image": "sword(Clone)",
             "row": 0,
             "col": 0,
@@ -44,7 +45,8 @@
             "numberOfItems": 1,
             "maxItemsPerStack": 1,
             "isStackable": true,
-            "sprite": "potion",
+            "usingDefaultDisplay": false,
+            "sprite": "potion1",
             "image": "potion(Clone)",
             "row": 0,
             "col": 0,
@@ -62,7 +64,8 @@
             "numberOfItems": 1,
             "maxItemsPerStack": 1,
             "isStackable": true,
-            "sprite": "wooden-shield",
+            "usingDefaultDisplay": false,
+            "sprite": "wooden-shield3",
             "image": "shield(Clone)",
             "row": 0,
             "col": 0,
@@ -75,7 +78,7 @@
         }
     ],
     "usedItems": [],
-    "isOpen": false,
+    "isOpen": true,
     "openCommand": "not set",
     "closeCommand": "not set",
     "submitCommand": "not set",
@@ -87,14 +90,14 @@
         "y": 0.0,
         "z": 0.0
     },
-    "initialTransform": "Display",
-    "pagesText": "Pages",
-    "totalItemsText": "TotalNumberOfItems",
+    "initialTransform": "Display4",
+    "pagesText": "Pages4",
+    "totalItemsText": "TotalNumberOfItems4",
     "rowOffset": 50,
     "columnOffset": -50,
     "maxItemsPerRow": 5,
     "maxRows": 2,
-    "cursor": "Cursor",
+    "cursor": "Cursor4",
     "spriteLocations": "Assets/Sprites/",
     "name": "Inventory"
 }
