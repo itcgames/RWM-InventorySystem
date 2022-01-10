@@ -892,7 +892,7 @@ public class Inventory : MonoBehaviour
             {
                 errorsString += item.GetComponent<InventoryItem>().savingErrors;
                 errorsString += "Error loading item at index: " + currentIndex + " for the items array\n";
-                Debug.LogError("Error loading item at index: " + currentIndex + " for the items array\n");
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the items array\n");
             }
             currentIndex++;
         }
@@ -904,7 +904,7 @@ public class Inventory : MonoBehaviour
             {
                 errorsString += item.GetComponent<InventoryItem>().savingErrors;
                 errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
-                Debug.LogError("Error loading item at index: " + currentIndex + " for the used items array\n");
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
             }
             currentIndex++;
         }
@@ -1035,7 +1035,7 @@ public class Inventory : MonoBehaviour
                 //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
                 errorsString += script.loadingErrors;
                 errorsString += "Error loading item at index: " + currentIndex + " for the regular items array\n";
-                Debug.LogError("Error loading item at index: " + currentIndex + " for the regular items array\n");
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the regular items array\n");
                 if(newItem.GetComponent<InventoryItem>().Sprite != null)
                 {
                     _items.Add(newItem);
@@ -1062,7 +1062,7 @@ public class Inventory : MonoBehaviour
                 //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
                 errorsString += script.loadingErrors;
                 errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
-                Debug.LogError("Error loading item at index: " + currentIndex + " for the used items array\n");
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
                 if (newItem.GetComponent<InventoryItem>().Sprite != null)
                 {
                     _items.Add(newItem);

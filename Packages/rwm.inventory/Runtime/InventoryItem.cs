@@ -219,7 +219,7 @@ public class InventoryItem : MonoBehaviour
         }
         catch (Exception e)
         {
-            Debug.LogError(e.Message);
+            Debug.LogWarning(e.Message);
             loadingErrors += e.Message + "\n";
             return false;
         }
@@ -259,7 +259,7 @@ public class InventoryItem : MonoBehaviour
             }
             catch(Exception e)
             {
-                Debug.LogError(e.Message);
+                Debug.LogWarning(e.Message);
                 loadingErrors += e.Message + "\n";
                 loadingErrors += "This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the def" +
                     "ault location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself\n";
@@ -276,7 +276,7 @@ public class InventoryItem : MonoBehaviour
                 }
                 catch(Exception error)
                 {
-                    Debug.LogError(e.Message);
+                    Debug.LogWarning(e.Message);
                     loadingErrors += e.Message + "\n";
                     loadingErrors += "Unable to load error sprite.\n";
                 }
