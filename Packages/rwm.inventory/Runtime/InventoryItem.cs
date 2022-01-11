@@ -143,6 +143,10 @@ public class InventoryItem : MonoBehaviour
             if (_sprite != null)
             {
                 _image.sprite = _sprite;
+                if(string.IsNullOrEmpty(_image.sprite.name))
+                {
+                    _image.sprite.name = _sprite.name;
+                }               
             }
         }
     }
@@ -253,6 +257,7 @@ public class InventoryItem : MonoBehaviour
                 Texture2D texture = new Texture2D(1, 1);
                 texture.LoadImage(bytes);
                 _sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                _sprite.name = data.sprite;
                 SetCanvasAsParent();
                 SetUpDisplay();
                 AddImage();
@@ -270,6 +275,7 @@ public class InventoryItem : MonoBehaviour
                     Texture2D texture = new Texture2D(1, 1);
                     texture.LoadImage(bytes);
                     _sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f));
+                    _sprite.name = "Error-Sprite";
                     SetCanvasAsParent();
                     SetUpDisplay();
                     AddImage();
