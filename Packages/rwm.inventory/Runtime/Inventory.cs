@@ -1,8 +1,11 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using UnityEngine.UI;
 
+[Serializable]
 public class Inventory : MonoBehaviour
 {
     [SerializeField]
@@ -11,9 +14,6 @@ public class Inventory : MonoBehaviour
     [SerializeField]
     [Tooltip("Set to true if you want the inventory to automatically draw. Set to false if you want to implement your own UI for the inventory.")]
     private bool _useDefaultDisplay;
-    [SerializeField]
-    [Tooltip("Font that the inventory will use to display the UI. Only needed if Use Default Display is set to true.")]
-    private Font _font;
     [SerializeField]
     [Tooltip("Set to true if you want to display info on the current item when the inventory is open. The corresponding text variables need to be passed in so that the inventory is able" +
         "to properly display the info")]
@@ -52,6 +52,15 @@ public class Inventory : MonoBehaviour
     public int maxItemsPerRow = 0;
     public int maxRows = 0;
     public GameObject cursor;
+    [Tooltip("Folder that the images for the items are stored in so that when the inventory is loaded back in it can load the correct images.")]
+    public string spriteLocations = "not set";
+    public bool useDefaultLocation;
+    public string jsonName;
+    public string pathToJson;
+    public bool forceOverwrite;
+    public string pathToLoadJsonFrom;
+    public string jsonToLoadFrom;
+
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -707,4 +716,481 @@ public class Inventory : MonoBehaviour
         int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows);
         return (index >= initialPageIndex && index <= lastPageIndex);
     }
+
+    private void HideOrShowInventory()
+    {
+        if(!_isOpen)
+        {
+            if(_useDefaultDisplay)
+            {
+                foreach(GameObject item in _items)
+                {
+                    item.SetActive(false);
+                }
+                _currentItemAmount.gameObject.SetActive(false);
+                _currentItemName.gameObject.SetActive(false);
+                _currentItemDescription.gameObject.SetActive(false);
+                cursor.gameObject.SetActive(false);
+                pagesText.gameObject.SetActive(false);
+                totalItemsText.gameObject.SetActive(false);
+                
+            }
+        }
+        else
+        {
+            if(_useDefaultDisplay)
+            {
+                _currentItemAmount.gameObject.SetActive(true);
+                _currentItemName.gameObject.SetActive(true);
+                _currentItemDescription.gameObject.SetActive(true);
+                cursor.gameObject.SetActive(true);
+                pagesText.gameObject.SetActive(true);
+                totalItemsText.gameObject.SetActive(true);
+                DisplayInfoOnCurrentItem();
+                OnlyDisplayCurrentPage();
+            }
+        }
+    }
+
+    public void LoadFromJsonFile()
+    {
+        InventorySaveData data = null;
+        string json;
+        if(useDefaultLocation)
+        {
+            if(!File.Exists(Application.persistentDataPath + jsonToLoadFrom + ".json"))
+            {
+                Debug.LogError("Tried to load json from persistent path but the file could not be found.");
+                return;
+            }
+            json = File.ReadAllText(Application.persistentDataPath + jsonToLoadFrom + ".json");
+            data = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        else
+        {
+            if (!File.Exists(pathToLoadJsonFrom + jsonToLoadFrom + ".json"))
+            {
+                Debug.LogError("Tried to load json from the provided path but the file could not be found or the directory did not exist.");
+                return;
+            }
+            json = File.ReadAllText(pathToLoadJsonFrom + jsonToLoadFrom + ".json");
+            data = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        LoadFromSaveData(data);
+        HideOrShowInventory();
+        return;
+    }
+
+    public string SaveToJsonString(bool prettyPrint)
+    {
+        return JsonUtility.ToJson(GetSaveDataForInventory(), prettyPrint);
+    }
+
+    public void SaveToJson()
+    {
+        if(string.IsNullOrEmpty(pathToJson) && !useDefaultLocation)
+        {
+            Debug.LogError("No Path Given to where the json should be stored and the default path is not being used.");
+            return;
+        }
+        if(string.IsNullOrEmpty(jsonName))
+        {
+            Debug.LogError("No name given to the json file that should be created. No File has been created.");
+            return;
+        }
+        InventorySaveData oldData = null;
+        if((File.Exists(pathToJson + jsonName + ".json") && !useDefaultLocation) || File.Exists(Application.persistentDataPath + jsonName + ".json"))
+        {
+            string json;
+            if (useDefaultLocation)
+            {
+                json = File.ReadAllText(Application.persistentDataPath + jsonName + ".json");
+            }
+            else
+            {
+                json = File.ReadAllText(pathToJson + jsonName + ".json");
+            }
+            oldData = JsonUtility.FromJson<InventorySaveData>(json);
+        }
+        InventorySaveData saveData = GetSaveDataForInventory();
+        if (oldData != null && oldData.name != saveData.name && !forceOverwrite)
+        {
+            Debug.LogWarning("No Data Saved. File that was tried to be used for saving already stores inventory of different name and overwriting has not been enabled for this inventory.");
+            return;
+        }
+        string inventory = JsonUtility.ToJson(saveData, true);
+        if(useDefaultLocation)
+        {
+            File.WriteAllText(Application.persistentDataPath + jsonName + ".json", inventory);
+        }
+        else
+        {
+            if(!Directory.Exists(pathToJson))
+            {
+                Directory.CreateDirectory(pathToJson);
+            }
+            File.WriteAllText(pathToJson + jsonName + ".json", inventory);
+        }
+        
+        return;
+    }
+
+    private InventorySaveData GetSaveDataForInventory()
+    {
+        string errorsString = "";
+        InventorySaveData data = new InventorySaveData();
+        data.maxStackAmount = _maxStackAmount;
+        data.useDefaultDisplay = _useDefaultDisplay;
+        data.displayCurrentItemInfo = _displayCurrentItemInfo;
+        data.currentNameOffset = _currentNameOffset;
+        if(_useDefaultDisplay)
+        {
+            if(_currentItemName != null)
+            {
+                data.currentItemName = _currentItemName.name;
+            }
+            else
+            {
+                errorsString += "Current Item Name Text Does Not Exist.\n";
+            }
+            if(_currentItemDescription != null)
+            {
+                data.currentItemDescription = _currentItemDescription.name;
+            }
+            else
+            {
+                errorsString += "Current Item Description Text Does Not Exist.\n";
+            }
+            if(initialTransform != null)
+            {
+                data.initialTransform = initialTransform.name;
+            }
+            else
+            {
+                errorsString += "Initial Transform Does Not Exist.\n";
+            }
+            
+            data.spriteLocations = spriteLocations;
+            data.initialItemPosition = initialItemPosition;
+            if(pagesText != null)
+            {
+                data.pagesText = pagesText.name;
+            }
+            else
+            {
+                errorsString += "Pages Text Does Not Exist.\n";
+            }
+            if(totalItemsText != null)
+            {
+                data.totalItemsText = totalItemsText.name;
+            }
+            else
+            {
+                errorsString += "Total Items Text Does Not Exist.\n";
+            }
+            if(cursor != null)
+            {
+                data.cursor = cursor.name;
+            }
+            else
+            {
+                errorsString += "Cursor Does Not Exist.\n";
+            }
+            data.rowOffset = rowOffset;
+            data.columnOffset = columnOffset;
+        }
+        data.currentDescriptionOffset = _currentDescriptionOffset;
+        data.currentItemAmount = _currentItemAmount.name;
+        data.currentAmountOffset = _currentAmountOffset;
+        data.items = new List<ItemData>();
+        data.usedItems = new List<ItemData>();
+        int currentIndex = 0;
+        foreach (GameObject item in _items)
+        {
+            data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+            if(!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            {
+                errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the items array\n");
+            }
+            currentIndex++;
+        }
+        currentIndex = 0;
+        foreach (GameObject item in _usedItems)
+        {
+            data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+            if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            {
+                errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+            }
+            currentIndex++;
+        }
+        data.isOpen = _isOpen;
+        data.openCommand = _openCommand;
+        data.closeCommand = _closeCommand;
+        data.submitCommand = _submitCommand;
+        data.currentlySelectedIndex = _currentlySelectedIndex;
+        data.currentPageNumber = _currentPageNumber;
+        data.totalNumberOfPages = _totalNumberOfPages;
+        data.maxItemsPerRow = maxItemsPerRow;
+        data.maxRows = maxRows;
+        data.name = gameObject.name;
+        if (!string.IsNullOrEmpty(errorsString))
+        {
+            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventorySavingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
+            StreamWriter writer = new StreamWriter(fileName, true);
+            writer.WriteLine("Date created: " + DateTime.Now.ToString("dd-MM-yyyy"));
+            writer.WriteLine("Time created: " + DateTime.Now.ToString("hh-mm-ss"));
+            writer.Write(errorsString);
+            writer.Close();
+        }
+        return data;
+    }
+
+    private void LoadFromSaveData(InventorySaveData saveData)
+    {
+        string errorsString = "";
+        _maxStackAmount = saveData.maxStackAmount;
+        _useDefaultDisplay = saveData.useDefaultDisplay;
+        _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
+        _currentNameOffset = saveData.currentNameOffset;
+
+        List<GameObject> canvasChildren = new List<GameObject>();
+        GameObject obj;
+        GameObject canvas = GameObject.Find("Canvas");
+        if (_useDefaultDisplay)
+        {
+            if(canvas != null)
+            {
+                GameObject newTextObject;
+                for (int i = 0; i < canvas.transform.childCount; ++i)
+                {
+                    canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
+                if (obj != null)
+                {
+                    initialTransform = obj.transform;
+                }
+                else
+                {
+                    errorsString += "Unable to load initial transform\n";
+                    newTextObject = new GameObject(saveData.initialTransform);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    initialTransform = newTextObject.transform;
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.currentItemName);
+                if (obj != null)
+                {
+                    _currentItemName = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to current item name\n";
+                    newTextObject = new GameObject(saveData.currentItemName);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentItemName = newText;
+                }
+
+                obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
+                if (obj != null)
+                {
+                    _currentItemDescription = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to current item description\n";
+                    newTextObject = new GameObject(saveData.currentItemDescription);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentItemDescription = newText;
+                }
+                _currentDescriptionOffset = saveData.currentDescriptionOffset;
+                obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
+                if (obj != null)
+                {
+                    _currentItemAmount = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to load current item amount\n";
+                    newTextObject = new GameObject(saveData.currentItemAmount);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentItemAmount = newText;
+                }
+            }
+
+           
+            _currentAmountOffset = saveData.currentAmountOffset;
+        }
+        _items.ForEach(x => Destroy(x));
+        _items = new List<GameObject>();
+        spriteLocations = saveData.spriteLocations;
+        int currentIndex = 0;
+        foreach (ItemData item in saveData.items)
+        {
+            GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.SetParentTransform(initialTransform);
+            item.usingDefaultDisplay = _useDefaultDisplay;
+            bool success = script.LoadFromData(item, spriteLocations);
+           
+            if(success)
+            {
+                _items.Add(newItem);
+            }
+            else
+            {
+                //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
+                errorsString += script.loadingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the regular items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the regular items array\n");
+                if(newItem.GetComponent<InventoryItem>().Sprite != null)
+                {
+                    _items.Add(newItem);
+                }
+            }
+            currentIndex++;
+        }
+        _usedItems.ForEach(x => Destroy(x));
+        _usedItems = new List<GameObject>();
+        currentIndex = 0;
+        foreach (ItemData item in saveData.usedItems)
+        {
+            GameObject newItem = new GameObject();
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.SetParentTransform(initialTransform);
+            item.usingDefaultDisplay = _useDefaultDisplay;
+            bool success = script.LoadFromData(item, spriteLocations);
+            if (success)
+            {
+                _usedItems.Add(newItem);
+            }
+            else
+            {
+                //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
+                errorsString += script.loadingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                if (newItem.GetComponent<InventoryItem>().Sprite != null)
+                {
+                    _items.Add(newItem);
+                }
+            }
+            currentIndex++;
+        }
+        _isOpen = saveData.isOpen;
+        _openCommand = saveData.openCommand;
+        _closeCommand = saveData.closeCommand;
+        _submitCommand = saveData.submitCommand;
+        _currentlySelectedIndex = saveData.currentlySelectedIndex;
+        _currentPageNumber = saveData.currentPageNumber;
+        _totalNumberOfPages = saveData.totalNumberOfPages;
+        if(_useDefaultDisplay)
+        {
+            initialItemPosition = saveData.initialItemPosition;
+            obj = canvasChildren.Find(x => x.name == saveData.pagesText);
+            if(obj != null)
+            {
+                pagesText = obj.GetComponent<Text>();
+            }
+            else
+            {
+                errorsString += "Unable to load text for pages\n";
+                GameObject newTextObject = new GameObject(saveData.pagesText);
+                newTextObject.transform.SetParent(canvas.transform);
+                Text newText = newTextObject.AddComponent<Text>();
+                newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                newText.color = Color.black;
+                pagesText = newText;
+            }
+            obj = canvasChildren.Find(x => x.name == saveData.totalItemsText);
+            if(obj != null)
+            {
+                totalItemsText = obj.GetComponent<Text>();
+            }
+            else
+            {
+                errorsString += "Unable to load text for total number of items\n";
+                GameObject newTextObject = new GameObject(saveData.totalItemsText);
+                newTextObject.transform.SetParent(canvas.transform);
+                Text newText = newTextObject.AddComponent<Text>();
+                newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                newText.color = Color.black;
+                totalItemsText = newText;
+            }
+        }
+
+        rowOffset = saveData.rowOffset;
+        columnOffset = saveData.columnOffset;
+        maxItemsPerRow = saveData.maxItemsPerRow;
+        maxRows = saveData.maxRows;
+        obj = canvasChildren.Find(x => x.name == saveData.cursor);
+        if(obj != null && _useDefaultDisplay)
+        {
+            cursor = obj;
+        }
+        else
+        {
+            errorsString += "Unable to load cursor\n";
+        }
+        name = saveData.name;
+
+        if(!string.IsNullOrEmpty(errorsString))
+        {
+            string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventoryLoadingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
+            StreamWriter writer = new StreamWriter(fileName, true);
+            writer.WriteLine("Date created: " + DateTime.Now.ToString("dd-MM-yyyy"));
+            writer.WriteLine("Time created: " + DateTime.Now.ToString("hh-mm-ss"));
+            writer.Write(errorsString);
+            writer.Close();
+        }
+    }
+}
+
+[Serializable]
+class InventorySaveData
+{
+    public uint maxStackAmount = 0;
+    public bool useDefaultDisplay;
+    public string font;
+    public bool displayCurrentItemInfo;
+    public string currentItemName;
+    public Vector2 currentNameOffset;
+    public string currentItemDescription;
+    public Vector2 currentDescriptionOffset;
+    public string currentItemAmount;
+    public Vector2 currentAmountOffset;
+    public List<ItemData> items;
+    public List<ItemData> usedItems;
+    public bool isOpen;
+    public const string notSetString = "not set";
+    public string openCommand = notSetString;
+    public string closeCommand = notSetString;
+    public string submitCommand = notSetString;
+    public int currentlySelectedIndex = -1;
+    public int currentPageNumber = 0;
+    public int totalNumberOfPages = 0;
+    public Vector3 initialItemPosition = new Vector3(0, 0, 0);
+    public string initialTransform;
+    public string pagesText;
+    public string totalItemsText;
+    public int rowOffset = 10;
+    public int columnOffset = 10;
+    public int maxItemsPerRow = 0;
+    public int maxRows = 0;
+    public string cursor;
+    public string spriteLocations;
+    public string name;
 }

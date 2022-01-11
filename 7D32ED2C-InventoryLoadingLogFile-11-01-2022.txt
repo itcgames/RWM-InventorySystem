@@ -1,0 +1,32 @@
+Date created: 11-01-2022
+Time created: 05-40-29
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 0 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 1 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 2 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 3 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 4 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 5 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 6 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 7 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 8 for the regular items array
+Sprite Not Set To A Valid Image.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Error loading item at index: 9 for the regular items array

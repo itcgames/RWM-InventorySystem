@@ -140,4 +140,5 @@ public class PlayerScript : MonoBehaviour
             item.SetActive(false);
         }
     }
+
 }
