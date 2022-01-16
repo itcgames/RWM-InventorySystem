@@ -942,6 +942,18 @@ public class Inventory : MonoBehaviour
             }
             currentIndex++;
         }
+        currentIndex = 0;
+        foreach (GameObject item in _equippableItems)
+        {
+            data.equippedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+            if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            {
+                errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+            }
+            currentIndex++;
+        }
         data.isOpen = _isOpen;
         data.openCommand = _openCommand;
         data.closeCommand = _closeCommand;
@@ -1099,11 +1111,38 @@ public class Inventory : MonoBehaviour
                 Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
                 if (newItem.GetComponent<InventoryItem>().Sprite != null)
                 {
-                    _items.Add(newItem);
+                    _usedItems.Add(newItem);
                 }
             }
             currentIndex++;
         }
+        _equippableItems.ForEach(x => Destroy(x));
+        _equippableItems = new List<GameObject>();
+        foreach (ItemData item in saveData.equippedItems)
+        {
+            GameObject newItem = new GameObject();
+            InventoryItem script = newItem.AddComponent<InventoryItem>();
+            script.SetParentTransform(initialTransform);
+            item.usingDefaultDisplay = _useDefaultDisplay;
+            bool success = script.LoadFromData(item, spriteLocations);
+            if (success)
+            {
+                _equippableItems.Add(newItem);
+            }
+            else
+            {
+                //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
+                errorsString += script.loadingErrors;
+                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                if (newItem.GetComponent<InventoryItem>().Sprite != null)
+                {
+                    _equippableItems.Add(newItem);
+                }
+            }
+            currentIndex++;
+        }
+        currentIndex = 0;
         _isOpen = saveData.isOpen;
         _openCommand = saveData.openCommand;
         _closeCommand = saveData.closeCommand;
@@ -1188,6 +1227,7 @@ class InventorySaveData
     public Vector2 currentAmountOffset;
     public List<ItemData> items;
     public List<ItemData> usedItems;
+    public List<ItemData> equippedItems;
     public bool isOpen;
     public const string notSetString = "not set";
     public string openCommand = notSetString;
