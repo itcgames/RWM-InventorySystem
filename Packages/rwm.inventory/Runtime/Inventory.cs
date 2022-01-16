@@ -189,6 +189,7 @@ public class Inventory : MonoBehaviour
                     _currentItemAmount.gameObject.SetActive(false);
             }           
         }
+        DisplayEquippableItems();
     }
 
     public GameObject GetCurrentlySelectedObject()
@@ -641,10 +642,14 @@ public class Inventory : MonoBehaviour
         if (_useDefaultDisplay) OnlyDisplayCurrentPage();
         if (_useDefaultDisplay)
         {
-            _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
-            if (_items.Count == 0) _totalNumberOfPages = 0;
-            pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
-            totalItemsText.text = "Num Items: " + _items.Count;
+            if(_items != null)
+            {
+                _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
+                if (_items.Count == 0) _totalNumberOfPages = 0;
+                pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+                totalItemsText.text = "Num Items: " + _items.Count;
+            }
+
         }
 
     }
@@ -1000,42 +1005,55 @@ public class Inventory : MonoBehaviour
         data.currentAmountOffset = _currentAmountOffset;
         data.items = new List<ItemData>();
         data.usedItems = new List<ItemData>();
+        data.equippedItems = new List<ItemData>();
         int currentIndex = 0;
-        foreach (GameObject item in _items)
+        if(_items != null)
         {
-            data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
-            if(!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            foreach (GameObject item in _items)
             {
-                errorsString += item.GetComponent<InventoryItem>().savingErrors;
-                errorsString += "Error loading item at index: " + currentIndex + " for the items array\n";
-                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the items array\n");
+                data.items.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+                if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+                {
+                    errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                    errorsString += "Error loading item at index: " + currentIndex + " for the items array\n";
+                    Debug.LogWarning("Error loading item at index: " + currentIndex + " for the items array\n");
+                }
+                currentIndex++;
             }
-            currentIndex++;
         }
+
         currentIndex = 0;
-        foreach (GameObject item in _usedItems)
+        if(_usedItems != null)
         {
-            data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
-            if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            foreach (GameObject item in _usedItems)
             {
-                errorsString += item.GetComponent<InventoryItem>().savingErrors;
-                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
-                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                data.usedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+                if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+                {
+                    errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                    errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                    Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                }
+                currentIndex++;
             }
-            currentIndex++;
         }
+
         currentIndex = 0;
-        foreach (GameObject item in _equippableItems)
+        if(_equippableItems != null)
         {
-            data.equippedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
-            if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+            foreach (GameObject item in _equippableItems)
             {
-                errorsString += item.GetComponent<InventoryItem>().savingErrors;
-                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
-                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                data.equippedItems.Add(item.GetComponent<InventoryItem>().CreateSaveData(_useDefaultDisplay));
+                if (!string.IsNullOrEmpty(item.GetComponent<InventoryItem>().savingErrors))
+                {
+                    errorsString += item.GetComponent<InventoryItem>().savingErrors;
+                    errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
+                    Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                }
+                currentIndex++;
             }
-            currentIndex++;
         }
+
         data.isOpen = _isOpen;
         data.openCommand = _openCommand;
         data.closeCommand = _closeCommand;

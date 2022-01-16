@@ -20,15 +20,15 @@
     },
     "items": [
         {
-            "itemTag": "sword",
-            "description": "Used to gain\nstrength",
+            "itemTag": "potion",
+            "description": "Used to gain\nhealth if not \nat max.",
             "displayNumberOfItems": true,
-            "numberOfItems": 4,
-            "maxItemsPerStack": 5,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
             "isStackable": true,
             "usingDefaultDisplay": false,
-            "sprite": "white-sword",
-            "image": "sword",
+            "sprite": "potion",
+            "image": "potion",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -36,7 +36,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "equippableItem": false
         },
         {
             "itemTag": "potion",
@@ -55,7 +56,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "equippableItem": false
         },
         {
             "itemTag": "potion",
@@ -74,7 +76,28 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "equippableItem": false
+        },
+        {
+            "itemTag": "potion",
+            "description": "Used to gain\nhealth if not \nat max.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "potion",
+            "image": "potion",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
         },
         {
             "itemTag": "shield",
@@ -93,7 +116,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "equippableItem": false
         },
         {
             "itemTag": "shield",
@@ -112,7 +136,8 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "equippableItem": false
         },
         {
             "itemTag": "shield",
@@ -131,17 +156,160 @@
                 "x": 0.0,
                 "y": 0.0,
                 "z": 0.0
-            }
+            },
+            "equippableItem": false
+        },
+        {
+            "itemTag": "shield",
+            "description": "Used to gain\nblock.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "wooden-shield",
+            "image": "shield",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
+        },
+        {
+            "itemTag": "shield",
+            "description": "Used to gain\nblock.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "wooden-shield",
+            "image": "shield",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
+        },
+        {
+            "itemTag": "potion",
+            "description": "Used to gain\nhealth if not \nat max.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "potion",
+            "image": "potion",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
+        },
+        {
+            "itemTag": "potion",
+            "description": "Used to gain\nhealth if not \nat max.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "potion",
+            "image": "potion",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
         }
     ],
     "usedItems": [],
+    "equippedItems": [
+        {
+            "itemTag": "sword",
+            "description": "Used to gain\nstrength",
+            "displayNumberOfItems": true,
+            "numberOfItems": 5,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "Error-Sprite",
+            "image": "New Game Object",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": true
+        },
+        {
+            "itemTag": "sword",
+            "description": "Used to gain\nstrength",
+            "displayNumberOfItems": true,
+            "numberOfItems": 5,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "Error-Sprite",
+            "image": "New Game Object",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": true
+        },
+        {
+            "itemTag": "sword",
+            "description": "Used to gain\nstrength",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "Error-Sprite",
+            "image": "New Game Object",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": true
+        }
+    ],
     "isOpen": true,
     "openCommand": "not set",
     "closeCommand": "not set",
     "submitCommand": "not set",
     "currentlySelectedIndex": 0,
     "currentPageNumber": 0,
-    "totalNumberOfPages": 1,
+    "totalNumberOfPages": 2,
     "initialItemPosition": {
         "x": 0.0,
         "y": 0.0,
