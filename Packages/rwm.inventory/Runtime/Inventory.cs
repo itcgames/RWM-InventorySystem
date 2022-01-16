@@ -60,7 +60,10 @@ public class Inventory : MonoBehaviour
     public bool forceOverwrite;
     public string pathToLoadJsonFrom;
     public string jsonToLoadFrom;
-
+    [SerializeField]
+    [Tooltip("Use this to set how many stacks of items you want to store inside of the inventory")]
+    private uint _maxEquippableStackAmount = 0;
+    private List<GameObject> _equippableItems;
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
 
@@ -69,6 +72,9 @@ public class Inventory : MonoBehaviour
 
     [HideInInspector]
     public List<GameObject> UsedItems { get => _usedItems;}
+
+    [HideInInspector]
+    public List<GameObject> EquippedItems { get => _equippableItems;}
 
     public bool IsOpen { get => _isOpen; set => _isOpen = value; }
 
@@ -190,25 +196,33 @@ public class Inventory : MonoBehaviour
 
     public void AddItem(GameObject newItem, uint amount)
     {
-        if (newItem.GetComponent<InventoryItem>() == null) return;//if it doesnt have the script then we can't add it as we won't be able to process it
-        if (_items == null)//if this is the first item to be put into the inventory
+        InventoryItem script = newItem.GetComponent<InventoryItem>();
+        if (script == null) return;//if it doesnt have the script then we can't add it as we won't be able to process it
+        if(!script.equippableItem)
         {
-            AddFirstItemToInventory(newItem, amount);
-            OnlyDisplayCurrentPage();
-            return;
-        }
-        if (newItem.GetComponent<InventoryItem>().IsStackable)
-        {
-            // check if it is already in the inventory and if it is add to the stack or create new stack if last stack is full
-            GameObject lastItem = FindLastAddedStackOfItem(newItem.GetComponent<InventoryItem>());
-            if (lastItem != null)
+            if (_items == null)//if this is the first item to be put into the inventory
             {
-                AddUntilNoItemsLeft(lastItem, (int)amount);
+                AddFirstItemToInventory(newItem, amount);
                 OnlyDisplayCurrentPage();
                 return;
             }
+            if (newItem.GetComponent<InventoryItem>().IsStackable)
+            {
+                // check if it is already in the inventory and if it is add to the stack or create new stack if last stack is full
+                GameObject lastItem = FindLastAddedStackOfItem(newItem.GetComponent<InventoryItem>());
+                if (lastItem != null)
+                {
+                    AddUntilNoItemsLeft(lastItem, (int)amount);
+                    OnlyDisplayCurrentPage();
+                    return;
+                }
+            }
+            AddNewItemToInventory(newItem, amount);
         }
-        AddNewItemToInventory(newItem, amount);
+        else
+        {
+
+        }
         OnlyDisplayCurrentPage();
     }
 
