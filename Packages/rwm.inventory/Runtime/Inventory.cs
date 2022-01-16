@@ -43,8 +43,13 @@ public class Inventory : MonoBehaviour
     private int _currentlySelectedIndex = -1;
     private int _currentPageNumber = 0;
     private int _totalNumberOfPages = 0;
+    private int _currentlySelectedEquippable = -1;
+    private int _currentEquippablePageNumber = 0;
+    private int _totalEquippableNumberOfPages = 0;
     public Vector3 initialItemPosition = new Vector3(0,0,0);
+    public Vector3 initialEquippableItemPosition = new Vector3(0, 0, 0);
     public Transform initialTransform;
+    public Transform initialEquippableTransform;
     public Text pagesText;
     public Text totalItemsText;
     public int rowOffset = 10;
@@ -66,6 +71,7 @@ public class Inventory : MonoBehaviour
     private List<GameObject> _equippableItems;
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
+    public uint MaxEquippableSlots { get => _maxEquippableStackAmount;}
 
     [HideInInspector]
     public List<GameObject> Items { get => _items; }
@@ -103,7 +109,8 @@ public class Inventory : MonoBehaviour
     private void Start()
     {
         _isOpen = false;
-        if(cursor != null)
+        _usedItems = new List<GameObject>();
+        if (cursor != null)
             cursor.SetActive(false);
         _usedItems = new List<GameObject>();
         if(_currentItemName != null)
@@ -133,17 +140,31 @@ public class Inventory : MonoBehaviour
 
     private void Update()
     {
-        foreach(GameObject obj in _items)
+        if(_items != null)
         {
-            obj.GetComponent<InventoryItem>().SetCanvasAsParent();
+            foreach (GameObject obj in _items)
+            {
+                obj.GetComponent<InventoryItem>().SetCanvasAsParent();
+            }
+        }
+        if(_equippableItems != null)
+        {
+            foreach(GameObject obj in _equippableItems)
+            {
+                obj.GetComponent<InventoryItem>().SetCanvasAsParent();
+            }
         }
         if (_useDefaultDisplay)
         {
-            _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
-            if (_items.Count == 0) _totalNumberOfPages = 0;
-            pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
-            totalItemsText.text = "Num Items: " + _items.Count;
-            OnlyDisplayCurrentPage();
+            if(_items != null)
+            {
+                _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
+                if (_items.Count == 0) _totalNumberOfPages = 0;
+                pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+                totalItemsText.text = "Num Items: " + _items.Count;
+                OnlyDisplayCurrentPage();
+            }
+
         }
         if(_isOpen && _useDefaultDisplay)
         {
@@ -202,7 +223,7 @@ public class Inventory : MonoBehaviour
         {
             if (_items == null)//if this is the first item to be put into the inventory
             {
-                AddFirstItemToInventory(newItem, amount);
+                AddFirstItemToInventory(newItem, amount, ref _items, _maxStackAmount);
                 OnlyDisplayCurrentPage();
                 return;
             }
@@ -212,18 +233,36 @@ public class Inventory : MonoBehaviour
                 GameObject lastItem = FindLastAddedStackOfItem(newItem.GetComponent<InventoryItem>());
                 if (lastItem != null)
                 {
-                    AddUntilNoItemsLeft(lastItem, (int)amount);
+                    AddUntilNoItemsLeft(lastItem, (int)amount, ref _items, _maxStackAmount);
                     OnlyDisplayCurrentPage();
                     return;
                 }
             }
-            AddNewItemToInventory(newItem, amount);
+            AddNewItemToInventory(newItem, amount, ref _items, _maxStackAmount);
         }
         else
         {
-
+            if (_equippableItems == null)//if this is the first item to be put into the inventory
+            {
+                AddFirstItemToInventory(newItem, amount, ref _equippableItems, _maxStackAmount);
+                OnlyDisplayCurrentPage();
+                return;
+            }
+            if (newItem.GetComponent<InventoryItem>().IsStackable)
+            {
+                // check if it is already in the inventory and if it is add to the stack or create new stack if last stack is full
+                GameObject lastItem = FindLastEquippableItem(newItem.GetComponent<InventoryItem>());
+                if (lastItem != null)
+                {
+                    AddUntilNoItemsLeft(lastItem, (int)amount, ref _equippableItems, _maxStackAmount);
+                    OnlyDisplayCurrentPage();
+                    return;
+                }
+            }
+            AddNewItemToInventory(newItem, amount, ref _equippableItems, _maxStackAmount);
         }
         OnlyDisplayCurrentPage();
+        DisplayEquippableItems();
     }
 
     public void UseItem(string submitCommand)
@@ -265,6 +304,7 @@ public class Inventory : MonoBehaviour
                     _currentlySelectedIndex--;
                     if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
                     OnlyDisplayCurrentPage();
+                    DisplayEquippableItems();
                     Debug.Log("Removing used item from inventory");
                 }
                 int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
@@ -275,6 +315,7 @@ public class Inventory : MonoBehaviour
                     _currentPageNumber--;
                     if (_currentPageNumber < 0) _currentPageNumber = 0;
                     OnlyDisplayCurrentPage();
+                    DisplayEquippableItems();
                 }
             }  
         }
@@ -376,6 +417,7 @@ public class Inventory : MonoBehaviour
                     _currentlySelectedIndex++;
                     DisplayInfoOnCurrentItem();
                     OnlyDisplayCurrentPage();
+                    DisplayEquippableItems();
                     return;
                 }
                 _currentlySelectedIndex++;
@@ -399,6 +441,7 @@ public class Inventory : MonoBehaviour
                     _currentlySelectedIndex--;
                     DisplayInfoOnCurrentItem();
                     OnlyDisplayCurrentPage();
+                    DisplayEquippableItems();
                     return;
                 }
                 _currentlySelectedIndex--;
@@ -485,9 +528,9 @@ public class Inventory : MonoBehaviour
         _closeCommand = closeCommand;
     }
 
-    private void AddFirstItemToInventory(GameObject newItem, uint amount)
+    private void AddFirstItemToInventory(GameObject newItem, uint amount, ref List<GameObject> listToAddTo, uint maxAmountOfStacks)
     {
-        _items = new List<GameObject>();
+        listToAddTo = new List<GameObject>();
         InventoryItem script = newItem.GetComponent<InventoryItem>();
         if ((script.NumberOfItems + amount) <= script.MaxItemsPerStack)
         {
@@ -499,20 +542,20 @@ public class Inventory : MonoBehaviour
                 script.SetParentTransform(initialTransform);
                 script.SetCanvasAsParent();
             }
-            _items.Add(newItem);
+            listToAddTo.Add(newItem);
             if (!_isOpen)
             {
-                _items[_items.Count - 1].SetActive(false);
+                listToAddTo[listToAddTo.Count - 1].SetActive(false);
             }
             _currentPageNumber = 0;
             _totalNumberOfPages = 1;
             _currentlySelectedIndex = 0;
             if (cursor != null)
-                cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
+                cursor.transform.position = listToAddTo[_currentlySelectedIndex].transform.position;
             if (_useDefaultDisplay) OnlyDisplayCurrentPage();           
             return;
         }
-        else if ((script.NumberOfItems + amount) > script.MaxItemsPerStack && _items.Count < _maxStackAmount)
+        else if ((script.NumberOfItems + amount) > script.MaxItemsPerStack && listToAddTo.Count < maxAmountOfStacks)
         {
             uint remainingItems = amount - (script.MaxItemsPerStack - script.NumberOfItems);
             script.NumberOfItems = script.MaxItemsPerStack;
@@ -523,21 +566,21 @@ public class Inventory : MonoBehaviour
                 script.SetParentTransform(initialTransform);
                 script.SetCanvasAsParent();
             }
-            _items.Add(newItem);
+            listToAddTo.Add(newItem);
             _currentlySelectedIndex = 0;
             if (cursor != null)
-                cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
+                cursor.transform.position = listToAddTo[_currentlySelectedIndex].transform.position;
             if (!_isOpen)
             {
-                _items[_items.Count - 1].SetActive(false);
+                listToAddTo[listToAddTo.Count - 1].SetActive(false);
             }
             if(_useDefaultDisplay) OnlyDisplayCurrentPage();
-            AddUntilNoItemsLeft(newItem, (int)remainingItems);
+            AddUntilNoItemsLeft(newItem, (int)remainingItems, ref listToAddTo, maxAmountOfStacks);
             return;
         }        
     }
 
-    private void AddUntilNoItemsLeft(GameObject itemType, int amountOfItems)
+    private void AddUntilNoItemsLeft(GameObject itemType, int amountOfItems, ref List<GameObject> listToAddTo, uint maxAmountOfStacks)
     {
         InventoryItem script = itemType.GetComponent<InventoryItem>();
 
@@ -553,7 +596,7 @@ public class Inventory : MonoBehaviour
             script.NumberOfItems = script.MaxItemsPerStack;
         }
 
-        while (amountOfItems > 0 && _items.Count < _maxStackAmount)
+        while (amountOfItems > 0 && listToAddTo.Count < maxAmountOfStacks)
         {
             if(amountOfItems > script.MaxItemsPerStack)
             {
@@ -568,10 +611,10 @@ public class Inventory : MonoBehaviour
                     newScript.SetParentTransform(initialTransform);
                     newScript.SetCanvasAsParent();
                 }
-                _items.Add(newobj);
+                listToAddTo.Add(newobj);
                 if (!_isOpen)
                 {
-                    _items[_items.Count - 1].SetActive(false);
+                    listToAddTo[listToAddTo.Count - 1].SetActive(false);
                 }                
             }
             else
@@ -588,10 +631,10 @@ public class Inventory : MonoBehaviour
                     newScript.SetCanvasAsParent();
                 }
 
-                _items.Add(newobj);
+                listToAddTo.Add(newobj);
                 if (!_isOpen)
                 {
-                    _items[_items.Count - 1].SetActive(false);
+                    listToAddTo[listToAddTo.Count - 1].SetActive(false);
                 }
             }
         }
@@ -606,20 +649,20 @@ public class Inventory : MonoBehaviour
 
     }
 
-    private void AddNewItemToInventory(GameObject newItem, uint amount)
+    private void AddNewItemToInventory(GameObject newItem, uint amount, ref List<GameObject> listToAddTo, uint maxAmountOfStacks)
     {
-        if (1 + _items.Count > _maxStackAmount) return;//don't add to the inventory when it's full
+        if (1 + listToAddTo.Count > _maxStackAmount) return;//don't add to the inventory when it's full
         newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
         InventoryItem script = newItem.GetComponent<InventoryItem>();
         script.Position = initialItemPosition;
         script.SetUpDisplay();
         script.SetParentTransform(initialTransform);
         script.SetCanvasAsParent();
-        _items.Add(newItem);
+        listToAddTo.Add(newItem);
         if(_useDefaultDisplay) OnlyDisplayCurrentPage();
         if (!_isOpen)
         {
-            _items[_items.Count - 1].SetActive(false);
+            listToAddTo[listToAddTo.Count - 1].SetActive(false);
         }
 
         if(_currentlySelectedIndex == -1)
@@ -631,6 +674,11 @@ public class Inventory : MonoBehaviour
     private GameObject FindLastAddedStackOfItem(InventoryItem item)
     {
         return _items.FindLast(x => x.GetComponent<InventoryItem>().Name == item.Name);
+    }
+
+    private GameObject FindLastEquippableItem(InventoryItem item)
+    {
+        return _equippableItems.FindLast(x => x.GetComponent<InventoryItem>().Name == item.Name);
     }
 
     private void OnlyDisplayCurrentPage()
@@ -651,7 +699,7 @@ public class Inventory : MonoBehaviour
                 item.SetActive(true);
             }
         }
-        if(_useDefaultDisplay) SetPositionsForCurrentPage(currentPage);
+        if(_useDefaultDisplay) SetPositionsForCurrentPage(currentPage, initialTransform, true);
 
         for (int i = 0; i < _items.Count; i++)
         {
@@ -667,9 +715,39 @@ public class Inventory : MonoBehaviour
             totalItemsText.text = "Num Items: " + _items.Count;
     }
 
-    private void SetPositionsForCurrentPage(List<GameObject> currentPage)
+    private void DisplayEquippableItems()
     {
-        Vector3 originalPosition = (initialTransform != null) ? initialTransform.position : new Vector3(0,0,0);
+        if (_equippableItems == null || _equippableItems.Count == 0) return;
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+        if (lastPageIndex >= _equippableItems.Count)
+        {
+            lastPageIndex = _equippableItems.Count - 1;
+        }
+        if (lastPageIndex < 0) return;
+        List<GameObject> currentPage = _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentPageNumber), (lastPageIndex - initialPageIndex) + 1);
+        if (_isOpen)
+        {
+            foreach (GameObject item in currentPage)
+            {
+                item.SetActive(true);
+            }
+        }
+        if (_useDefaultDisplay) SetPositionsForCurrentPage(currentPage, initialEquippableTransform, false);
+
+        for (int i = 0; i < _equippableItems.Count; i++)
+        {
+            if (i >= initialPageIndex && i <= lastPageIndex)
+            {
+                continue;
+            }
+            _equippableItems[i].SetActive(false);
+        }
+    }
+
+    private void SetPositionsForCurrentPage(List<GameObject> currentPage, Transform transform, bool displayingMainInventory)
+    {
+        Vector3 originalPosition = (transform != null) ? transform.position : new Vector3(0,0,0);
         int countOnRow = 0;
         foreach (GameObject item in currentPage)
         {
@@ -679,7 +757,7 @@ public class Inventory : MonoBehaviour
             if(countOnRow >= maxItemsPerRow)
             {
                 countOnRow = 0;
-                originalPosition.x = initialTransform.position.x;
+                originalPosition.x = transform.position.x;
                 originalPosition.y += columnOffset;
             }
             else
@@ -687,10 +765,13 @@ public class Inventory : MonoBehaviour
                 originalPosition.x += rowOffset;
             }
         }
-        if (cursor != null)
-            cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
-        if (_displayCurrentItemInfo)
-            DisplayInfoOnCurrentItem();
+        if(displayingMainInventory)
+        {
+            if (cursor != null)
+                cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
+            if (_displayCurrentItemInfo)
+                DisplayInfoOnCurrentItem();
+        }
     }
 
     private void DisplayInfoOnCurrentItem()
@@ -762,6 +843,7 @@ public class Inventory : MonoBehaviour
                 totalItemsText.gameObject.SetActive(true);
                 DisplayInfoOnCurrentItem();
                 OnlyDisplayCurrentPage();
+                DisplayEquippableItems();
             }
         }
     }

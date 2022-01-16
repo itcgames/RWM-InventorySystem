@@ -332,6 +332,41 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 151882143}
   m_CullTransparentMesh: 0
+--- !u!1 &174167398
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 174167399}
+  m_Layer: 5
+  m_Name: EquippableItemsTransform
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &174167399
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174167398}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 1189184913}
+  m_RootOrder: 13
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0.5, y: 0.5}
+  m_AnchorMax: {x: 0.5, y: 0.5}
+  m_AnchoredPosition: {x: -418, y: -155}
+  m_SizeDelta: {x: 100, y: 100}
+  m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &241117414
 GameObject:
   m_ObjectHideFlags: 0
@@ -912,7 +947,9 @@ MonoBehaviour:
   _currentItemAmount: {fileID: 2025401077}
   _currentAmountOffset: {x: 0, y: 50}
   initialItemPosition: {x: 0, y: 0, z: 0}
+  initialEquippableItemPosition: {x: 0, y: 0, z: 0}
   initialTransform: {fileID: 1975802610}
+  initialEquippableTransform: {fileID: 174167399}
   pagesText: {fileID: 812381474}
   totalItemsText: {fileID: 1923825996}
   rowOffset: 50
@@ -927,6 +964,7 @@ MonoBehaviour:
   forceOverwrite: 1
   pathToLoadJsonFrom: json/
   jsonToLoadFrom: test
+  _maxEquippableStackAmount: 5
 --- !u!4 &627402343
 Transform:
   m_ObjectHideFlags: 0
@@ -1488,6 +1526,7 @@ RectTransform:
   - {fileID: 151882144}
   - {fileID: 707579743}
   - {fileID: 498483067}
+  - {fileID: 174167399}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1540,6 +1579,7 @@ MonoBehaviour:
   savingErrors: 
   fileTypeOfSprite: .png
   canvas: {fileID: 1189184912}
+  equippableItem: 0
 --- !u!222 &1204810336
 CanvasRenderer:
   m_ObjectHideFlags: 0
@@ -1716,6 +1756,7 @@ MonoBehaviour:
   savingErrors: 
   fileTypeOfSprite: .png
   canvas: {fileID: 1189184912}
+  equippableItem: 1
 --- !u!4 &1383226727
 Transform:
   m_ObjectHideFlags: 0
@@ -2123,6 +2164,7 @@ MonoBehaviour:
   savingErrors: 
   fileTypeOfSprite: .png
   canvas: {fileID: 1189184912}
+  equippableItem: 0
 --- !u!4 &1854715218
 Transform:
   m_ObjectHideFlags: 0
