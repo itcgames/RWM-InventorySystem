@@ -364,7 +364,7 @@ public class Inventory : MonoBehaviour
             }
             if (wasUsed)
             {
-                item.NumberOfItems = item.NumberOfItems - 1;
+                item.UseItem();
                 DisplayInfoOnCurrentEquippable();
                 if (item.NumberOfItems <= 0)
                 {

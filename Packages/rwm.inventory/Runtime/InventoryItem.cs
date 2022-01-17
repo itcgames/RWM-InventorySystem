@@ -152,6 +152,11 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
+    public void UseItem()
+    {
+        _numberOfItems--;
+    }
+
     public ItemData CreateSaveData(bool usingDefaultDisplay)
     {
         savingErrors = "";
