@@ -58,7 +58,6 @@ public class Inventory : MonoBehaviour
     private int _totalNumberOfPages = 0;
     private int _currentlySelectedEquippable = -1;
     private int _currentEquippablePageNumber = 0;
-    private int _totalEquippableNumberOfPages = 0;
     public Vector3 initialItemPosition = new Vector3(0,0,0);
     public Vector3 initialEquippableItemPosition = new Vector3(0, 0, 0);
     public Transform initialTransform;
@@ -933,14 +932,14 @@ public class Inventory : MonoBehaviour
         }
         if(displayingMainInventory)
         {
-            if (cursor != null)
+            if (cursor != null && _items != null && _items.Count > 0)
                 cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             if (_displayCurrentItemInfo)
                 DisplayInfoOnCurrentItem();
         }
         else
         {
-            if (equippableCursor != null)
+            if (equippableCursor != null && _equippableItems != null && _equippableItems.Count > 0)
                 equippableCursor.transform.position = _equippableItems[_currentlySelectedEquippable].transform.position;
             if (_displayCurrentItemInfo)
                 DisplayInfoOnCurrentEquippable();
@@ -1209,7 +1208,50 @@ public class Inventory : MonoBehaviour
             }
             data.rowOffset = rowOffset;
             data.columnOffset = columnOffset;
+            if(equippableCursor != null)
+            {
+                data.equippableCursor = equippableCursor.name;
+            }
+            else
+            {
+                errorsString += "Equippable cursor does not exist.\n";
+            }
+            if (initialEquippableTransform != null)
+            {
+                data.initialEquippableTransform = initialEquippableTransform.name;
+            }
+            else
+            {
+                errorsString += "Initial Equippable Transform Does Not Exist.\n";
+            }
+            if (_currentEquippableName != null)
+            {
+                data.currentEquippableName = _currentEquippableName.name;
+            }
+            else
+            {
+                errorsString += "Current Item Name Text Does Not Exist.\n";
+            }
+            if (_currentEquippableDescription != null)
+            {
+                data.currentEquippableDescription = _currentEquippableDescription.name;
+            }
+            else
+            {
+                errorsString += "Current Item Description Text Does Not Exist.\n";
+            }
+            if (_currentEquippableAmount != null)
+            {
+                data.currentEquippableAmount = _currentEquippableAmount.name;
+            }
+            else
+            {
+                errorsString += "Current Item Name Text Does Not Exist.\n";
+            }
         }
+        data.currentlySelectedEquippable = _currentlySelectedEquippable;
+        data.currentEquippablePageNumber = _currentEquippablePageNumber;
+        data.maxEquippableStackAmount = _maxEquippableStackAmount;
         data.currentDescriptionOffset = _currentDescriptionOffset;
         data.currentItemAmount = _currentItemAmount.name;
         data.currentAmountOffset = _currentAmountOffset;
@@ -1293,7 +1335,9 @@ public class Inventory : MonoBehaviour
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
         _currentNameOffset = saveData.currentNameOffset;
-
+        _currentlySelectedEquippable = saveData.currentlySelectedEquippable;
+        _currentEquippablePageNumber = saveData.currentEquippablePageNumber;
+        _maxEquippableStackAmount = saveData.maxEquippableStackAmount;
         List<GameObject> canvasChildren = new List<GameObject>();
         GameObject obj;
         GameObject canvas = GameObject.Find("Canvas");
@@ -1305,6 +1349,18 @@ public class Inventory : MonoBehaviour
                 for (int i = 0; i < canvas.transform.childCount; ++i)
                 {
                     canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.initialEquippableTransform);
+                if(obj != null)
+                {
+                    initialEquippableTransform = obj.transform;
+                }
+                else
+                {
+                    errorsString += "Unable to load initial transform\n";
+                    newTextObject = new GameObject(saveData.initialEquippableTransform);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    initialEquippableTransform = newTextObject.transform;
                 }
                 obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
                 if (obj != null)
@@ -1333,6 +1389,21 @@ public class Inventory : MonoBehaviour
                     newText.color = Color.black;
                     _currentItemName = newText;
                 }
+                obj = canvasChildren.Find(x => x.name == saveData.currentEquippableName);
+                if (obj != null)
+                {
+                    _currentEquippableName = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to current item name\n";
+                    newTextObject = new GameObject(saveData.currentEquippableName);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentEquippableName = newText;
+                }
 
                 obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
                 if (obj != null)
@@ -1348,6 +1419,21 @@ public class Inventory : MonoBehaviour
                     newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
                     newText.color = Color.black;
                     _currentItemDescription = newText;
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.currentEquippableDescription);
+                if (obj != null)
+                {
+                    _currentEquippableDescription = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to current item description\n";
+                    newTextObject = new GameObject(saveData.currentEquippableDescription);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentEquippableDescription = newText;
                 }
                 _currentDescriptionOffset = saveData.currentDescriptionOffset;
                 obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
@@ -1365,12 +1451,26 @@ public class Inventory : MonoBehaviour
                     newText.color = Color.black;
                     _currentItemAmount = newText;
                 }
-            }
-
-           
+                obj = canvasChildren.Find(x => x.name == saveData.currentEquippableAmount);
+                if (obj != null)
+                {
+                    _currentEquippableAmount = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to load current item amount\n";
+                    newTextObject = new GameObject(saveData.currentEquippableAmount);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentEquippableAmount = newText;
+                }
+            }           
             _currentAmountOffset = saveData.currentAmountOffset;
         }
-        _items.ForEach(x => Destroy(x));
+        if(_items != null)
+            _items.ForEach(x => Destroy(x));
         _items = new List<GameObject>();
         spriteLocations = saveData.spriteLocations;
         int currentIndex = 0;
@@ -1426,7 +1526,8 @@ public class Inventory : MonoBehaviour
             }
             currentIndex++;
         }
-        _equippableItems.ForEach(x => Destroy(x));
+        if(_equippableItems != null)
+            _equippableItems.ForEach(x => Destroy(x));
         _equippableItems = new List<GameObject>();
         foreach (ItemData item in saveData.equippedItems)
         {
@@ -1547,6 +1648,7 @@ class InventorySaveData
     public int currentPageNumber = 0;
     public int totalNumberOfPages = 0;
     public Vector3 initialItemPosition = new Vector3(0, 0, 0);
+    public Vector3 initialEquippableItemPosition = new Vector3(0, 0, 0);
     public string initialTransform;
     public string pagesText;
     public string totalItemsText;
@@ -1557,4 +1659,12 @@ class InventorySaveData
     public string cursor;
     public string spriteLocations;
     public string name;
+    public int currentlySelectedEquippable;
+    public int currentEquippablePageNumber;
+    public string initialEquippableTransform;
+    public string equippableCursor;
+    public string currentEquippableName;
+    public string currentEquippableDescription;
+    public uint maxEquippableStackAmount;
+    public string currentEquippableAmount;
 }

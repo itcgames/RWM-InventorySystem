@@ -26,11 +26,11 @@
             "description": "Used to gain\nstrength",
             "displayNumberOfItems": true,
             "numberOfItems": 1,
-            "maxItemsPerStack": 5,
-            "isStackable": true,
+            "maxItemsPerStack": 1,
+            "isStackable": false,
             "usingDefaultDisplay": false,
             "sprite": "white-sword",
-            "image": "sword",
+            "image": "sword(Clone)",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -42,14 +42,19 @@
             "equippableItem": true
         }
     ],
-    "isOpen": true,
+    "isOpen": false,
     "openCommand": "not set",
     "closeCommand": "not set",
     "submitCommand": "not set",
-    "currentlySelectedIndex": 0,
+    "currentlySelectedIndex": -1,
     "currentPageNumber": 0,
     "totalNumberOfPages": 0,
     "initialItemPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "initialEquippableItemPosition": {
         "x": 0.0,
         "y": 0.0,
         "z": 0.0
@@ -63,5 +68,13 @@
     "maxRows": 2,
     "cursor": "Cursor",
     "spriteLocations": "Assets/Sprites/",
-    "name": "Inventory"
+    "name": "Inventory",
+    "currentlySelectedEquippable": 0,
+    "currentEquippablePageNumber": 0,
+    "initialEquippableTransform": "EquippableItemsTransform",
+    "equippableCursor": "HotbarCursor",
+    "currentEquippableName": "CurrentItemNameHotbar",
+    "currentEquippableDescription": "CurrentItemDescriptionHotbar",
+    "maxEquippableStackAmount": 12,
+    "currentEquippableAmount": "CurrentItemAmountHotbar"
 }
