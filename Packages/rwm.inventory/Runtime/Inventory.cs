@@ -1023,9 +1023,19 @@ public class Inventory : MonoBehaviour
         {
             if(_useDefaultDisplay)
             {
-                foreach(GameObject item in _items)
+                if(_items != null)
                 {
-                    item.SetActive(false);
+                    foreach (GameObject item in _items)
+                    {
+                        item.SetActive(false);
+                    }
+                }
+                if(_equippableItems != null)
+                {
+                    foreach (GameObject item in _equippableItems)
+                    {
+                        item.SetActive(false);
+                    }
                 }
                 _currentItemAmount.gameObject.SetActive(false);
                 _currentItemName.gameObject.SetActive(false);
@@ -1044,6 +1054,20 @@ public class Inventory : MonoBehaviour
         {
             if(_useDefaultDisplay)
             {
+                if (_items != null)
+                {
+                    foreach (GameObject item in _items)
+                    {
+                        item.SetActive(true);
+                    }
+                }
+                if (_equippableItems != null)
+                {
+                    foreach (GameObject item in _equippableItems)
+                    {
+                        item.SetActive(true);
+                    }
+                }
                 _currentItemAmount.gameObject.SetActive(true);
                 _currentItemName.gameObject.SetActive(true);
                 _currentItemDescription.gameObject.SetActive(true);
@@ -1087,6 +1111,10 @@ public class Inventory : MonoBehaviour
             data = JsonUtility.FromJson<InventorySaveData>(json);
         }
         LoadFromSaveData(data);
+        if (_items == null || _items.Count == 0)
+            _currentlySelectedIndex = -1;
+        if (_equippableItems == null || _equippableItems.Count == 0)
+            _currentlySelectedEquippable = -1;
         HideOrShowInventory();
         return;
     }
@@ -1611,6 +1639,10 @@ public class Inventory : MonoBehaviour
         }
         name = saveData.name;
 
+        if (_currentlySelectedIndex == -1)
+            _items = null;
+        if (_currentlySelectedEquippable == -1)
+            _equippableItems = null;
         if(!string.IsNullOrEmpty(errorsString))
         {
             string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventoryLoadingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
