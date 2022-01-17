@@ -243,26 +243,32 @@ public class Inventory : MonoBehaviour
         }
         else
         {
-            if (_equippableItems == null)//if this is the first item to be put into the inventory
+            AddItemToEquippable(newItem, amount);
+        }
+        OnlyDisplayCurrentPage();
+        DisplayEquippableItems();
+    }
+
+    public void AddItemToEquippable(GameObject newItem, uint amount)
+    {
+        if (_equippableItems == null)//if this is the first item to be put into the inventory
+        {
+            AddFirstItemToInventory(newItem, amount, ref _equippableItems, _maxStackAmount);
+            OnlyDisplayCurrentPage();
+            return;
+        }
+        if (newItem.GetComponent<InventoryItem>().IsStackable)
+        {
+            // check if it is already in the inventory and if it is add to the stack or create new stack if last stack is full
+            GameObject lastItem = FindLastEquippableItem(newItem.GetComponent<InventoryItem>());
+            if (lastItem != null)
             {
-                AddFirstItemToInventory(newItem, amount, ref _equippableItems, _maxStackAmount);
+                AddUntilNoItemsLeft(lastItem, (int)amount, ref _equippableItems, _maxStackAmount);
                 OnlyDisplayCurrentPage();
                 return;
             }
-            if (newItem.GetComponent<InventoryItem>().IsStackable)
-            {
-                // check if it is already in the inventory and if it is add to the stack or create new stack if last stack is full
-                GameObject lastItem = FindLastEquippableItem(newItem.GetComponent<InventoryItem>());
-                if (lastItem != null)
-                {
-                    AddUntilNoItemsLeft(lastItem, (int)amount, ref _equippableItems, _maxStackAmount);
-                    OnlyDisplayCurrentPage();
-                    return;
-                }
-            }
-            AddNewItemToInventory(newItem, amount, ref _equippableItems, _maxStackAmount);
         }
-        OnlyDisplayCurrentPage();
+        AddNewItemToInventory(newItem, amount, ref _equippableItems, _maxStackAmount);
         DisplayEquippableItems();
     }
 
