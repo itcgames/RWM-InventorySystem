@@ -1,0 +1,9 @@
+Date created: 16-01-2022
+Time created: 03-39-22
+There is no 'RectTransform' attached to the "New Game Object" game object, but a script is trying to access it.
+You probably need to add a RectTransform to the game object "New Game Object". Or your script needs to check if the component is attached before using it.
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+There is no 'RectTransform' attached to the "New Game Object" game object, but a script is trying to access it.
+You probably need to add a RectTransform to the game object "New Game Object". Or your script needs to check if the component is attached before using it.
+Unable to load error sprite.
+Error loading item at index: 0 for the used items array
