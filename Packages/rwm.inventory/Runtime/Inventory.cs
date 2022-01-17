@@ -232,6 +232,30 @@ public class Inventory : MonoBehaviour
         return null;
     }
 
+    public GameObject GetCurrentlySelectedEquippable()
+    {
+        if (_equippableItems != null && _currentlySelectedEquippable >= 0 && _currentlySelectedEquippable < _equippableItems.Count)
+        {
+            return _equippableItems[_currentlySelectedEquippable];
+        }
+        return null;
+    }
+
+    public List<GameObject> GetCurrentPageOfEquippables()
+    {
+        if (_equippableItems == null || _equippableItems.Count == 0) return new List<GameObject>();
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+        if (lastPageIndex >= _equippableItems.Count)
+        {
+            lastPageIndex = _equippableItems.Count - 1;
+        }
+        if (lastPageIndex < 0) return new List<GameObject>();
+        int count = (lastPageIndex - initialPageIndex) + 1;
+        Debug.Log("Count: " + count);
+        return _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
+    }
+
     public void AddItem(GameObject newItem, uint amount)
     {
         InventoryItem script = newItem.GetComponent<InventoryItem>();
@@ -340,6 +364,22 @@ public class Inventory : MonoBehaviour
                 }
             }  
         }
+    }
+
+    public void UseEquippableAtCurrentPageIndex(int index)
+    {
+        if (_equippableItems == null || _equippableItems.Count == 0) return;
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+        if (lastPageIndex >= _equippableItems.Count)
+        {
+            lastPageIndex = _equippableItems.Count - 1;
+        }
+        if (lastPageIndex < 0) return;
+        int count = (lastPageIndex - initialPageIndex) + 1;
+        Debug.Log("Count: " + count);
+        List<GameObject> currentPage = _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
+
     }
 
     public void UseEquippable()
