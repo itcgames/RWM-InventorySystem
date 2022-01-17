@@ -1,0 +1,17 @@
+Date created: 17-01-2022
+Time created: 09-32-50
+Could not find file "C:\Users\gameuser\RealWorldSim\RWM-InventorySystem\Assets\Sprites\Error-Sprite.png"
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Could not find file "C:\Users\gameuser\RealWorldSim\RWM-InventorySystem\Assets\Sprites\Error-Sprite.png"
+Unable to load error sprite.
+Error loading item at index: 0 for the used items array
+Could not find file "C:\Users\gameuser\RealWorldSim\RWM-InventorySystem\Assets\Sprites\Error-Sprite.png"
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Could not find file "C:\Users\gameuser\RealWorldSim\RWM-InventorySystem\Assets\Sprites\Error-Sprite.png"
+Unable to load error sprite.
+Error loading item at index: 1 for the used items array
+Could not find file "C:\Users\gameuser\RealWorldSim\RWM-InventorySystem\Assets\Sprites\Error-Sprite.png"
+This error was thrown when trying to load an image for the item. Please check that the file extension is correct and that the file name is spelled correctly. If using your own folder instead of the default location make sure that this folder exists. This may be a problem with how the sprite locations were saved inside of the inventory and not the item itself
+Could not find file "C:\Users\gameuser\RealWorldSim\RWM-InventorySystem\Assets\Sprites\Error-Sprite.png"
+Unable to load error sprite.
+Error loading item at index: 2 for the used items array

@@ -1194,7 +1194,7 @@ public class Inventory : MonoBehaviour
         currentIndex = 0;
         foreach (ItemData item in saveData.usedItems)
         {
-            GameObject newItem = new GameObject();
+            GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
             InventoryItem script = newItem.AddComponent<InventoryItem>();
             script.SetParentTransform(initialTransform);
             item.usingDefaultDisplay = _useDefaultDisplay;
@@ -1220,7 +1220,7 @@ public class Inventory : MonoBehaviour
         _equippableItems = new List<GameObject>();
         foreach (ItemData item in saveData.equippedItems)
         {
-            GameObject newItem = new GameObject();
+            GameObject newItem = new GameObject(item.itemTag, typeof(RectTransform));
             InventoryItem script = newItem.AddComponent<InventoryItem>();
             script.SetParentTransform(initialTransform);
             item.usingDefaultDisplay = _useDefaultDisplay;
@@ -1233,8 +1233,8 @@ public class Inventory : MonoBehaviour
             {
                 //this is an error but not neccesarilly a breaking error as the rest of the inventory should be able to be loaded without this item
                 errorsString += script.loadingErrors;
-                errorsString += "Error loading item at index: " + currentIndex + " for the used items array\n";
-                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the used items array\n");
+                errorsString += "Error loading item at index: " + currentIndex + " for the equipped items array\n";
+                Debug.LogWarning("Error loading item at index: " + currentIndex + " for the equipped items array\n");
                 if (newItem.GetComponent<InventoryItem>().Sprite != null)
                 {
                     _equippableItems.Add(newItem);
