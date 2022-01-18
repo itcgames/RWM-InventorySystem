@@ -18,7 +18,48 @@
         "x": 0.0,
         "y": 50.0
     },
-    "items": [],
+    "items": [
+        {
+            "itemTag": "potion",
+            "description": "Used to gain\nhealth if not \nat max.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "potion",
+            "image": "potion(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
+        },
+        {
+            "itemTag": "shield",
+            "description": "Used to gain\nblock.",
+            "displayNumberOfItems": true,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 1,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "wooden-shield",
+            "image": "shield(Clone)",
+            "row": 0,
+            "col": 0,
+            "canvas": "Canvas",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
+        }
+    ],
     "usedItems": [],
     "equippedItems": [
         {
@@ -42,13 +83,13 @@
             "equippableItem": true
         }
     ],
-    "isOpen": false,
+    "isOpen": true,
     "openCommand": "not set",
     "closeCommand": "not set",
     "submitCommand": "not set",
-    "currentlySelectedIndex": -1,
+    "currentlySelectedIndex": 0,
     "currentPageNumber": 0,
-    "totalNumberOfPages": 0,
+    "totalNumberOfPages": 1,
     "initialItemPosition": {
         "x": 0.0,
         "y": 0.0,

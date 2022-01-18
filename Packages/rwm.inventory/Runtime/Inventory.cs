@@ -322,74 +322,37 @@ public class Inventory : MonoBehaviour
 
     public void UseItem()
     {
-        if (_isOpen)
-        {
-            if (_items == null) return;
-            if (_items.Count == 0) return;
-            if (_items[_currentlySelectedIndex] == null) return;
-            InventoryItem item = _items[_currentlySelectedIndex].GetComponent<InventoryItem>();
-            bool wasUsed = true;
-            if(item.useFunction != null)
-            {
-                Debug.Log("has function");
-                wasUsed = item.useFunction();
-            }
-            else
-            {
-                if (_usedItems == null) _usedItems = new List<GameObject>();
-                _usedItems.Add(_items[_currentlySelectedIndex]);
-            }
-            if(wasUsed)
-            {
-                item.NumberOfItems--;
-                DisplayInfoOnCurrentItem();
-                if (item.NumberOfItems <= 0)
-                {
-                    GameObject obj = _items[_currentlySelectedIndex];
-                    _items.Remove(_items[_currentlySelectedIndex]);
-                    Destroy(obj);
-                    _currentlySelectedIndex--;
-                    if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
-                    OnlyDisplayCurrentPage();
-                    DisplayEquippableItems();
-                    Debug.Log("Removing used item from inventory");
-                }
-                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
-                if(initialPageIndex >= _items.Count)
-                {
-                    _currentPageNumber--;
-                    if (_currentPageNumber < 0) _currentPageNumber = 0;
-                    OnlyDisplayCurrentPage();
-                    DisplayEquippableItems();
-                }
-            }  
-        }
+        UseItemAtPosition(ref _currentlySelectedIndex, ref _items, ref _currentlySelectedIndex);
+    }
+
+    public void UseEquippable()
+    {
+        UseItemAtPosition(ref _currentlySelectedEquippable, ref _equippableItems, ref _currentEquippablePageNumber);
     }
 
     public void UseEquippableAtCurrentPageIndex(int index)
     {
         if (_equippableItems == null || _equippableItems.Count == 0) return;
+        if (index < 0 || index > maxItemsPerRow * maxRows || index >= _equippableItems.Count) return;
         int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
-        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
-        if (lastPageIndex >= _equippableItems.Count)
+        int itemIndex = initialPageIndex + index;
+        if (itemIndex >= _equippableItems.Count) return;
+        UseItemAtPosition(ref itemIndex, ref _equippableItems, ref _currentEquippablePageNumber);
+        if(_currentlySelectedEquippable >= _equippableItems.Count)
         {
-            lastPageIndex = _equippableItems.Count - 1;
+            _currentlySelectedEquippable--;
+            if (_currentlySelectedEquippable < 0) _currentlySelectedEquippable = 0;
         }
-        if (lastPageIndex < 0) return;
-        int count = (lastPageIndex - initialPageIndex) + 1;
-        Debug.Log("Count: " + count);
-        List<GameObject> currentPage = _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
-
     }
 
-    public void UseEquippable()
+    private void UseItemAtPosition(ref int index, ref List<GameObject> items, ref int currentPage)
     {
         if (_isOpen)
         {
-            if (_equippableItems == null) return;
-            if (_equippableItems.Count == 0) return;
-            if (_equippableItems[_currentlySelectedEquippable] == null) return;
-            InventoryItem item = _equippableItems[_currentlySelectedEquippable].GetComponent<InventoryItem>();
+            if (items == null) return;
+            if (items.Count == 0) return;
+            if (items[index] == null) return;
+            InventoryItem item = items[index].GetComponent<InventoryItem>();
             bool wasUsed = true;
             if (item.useFunction != null)
             {
@@ -399,28 +362,28 @@ public class Inventory : MonoBehaviour
             else
             {
                 if (_usedItems == null) _usedItems = new List<GameObject>();
-                _usedItems.Add(_equippableItems[_currentlySelectedEquippable]);
+                _usedItems.Add(items[index]);
             }
             if (wasUsed)
             {
                 item.UseItem();
-                DisplayInfoOnCurrentEquippable();
+                DisplayInfoOnCurrentItem();
                 if (item.NumberOfItems <= 0)
                 {
-                    GameObject obj = _equippableItems[_currentlySelectedEquippable];
-                    _equippableItems.Remove(_equippableItems[_currentlySelectedEquippable]);
+                    GameObject obj = items[index];
+                    items.Remove(items[index]);
                     Destroy(obj);
-                    _currentlySelectedEquippable--;
-                    if (_currentlySelectedEquippable < 0) _currentlySelectedEquippable = 0;
+                    index--;
+                    if (index < 0) index = 0;
                     OnlyDisplayCurrentPage();
                     DisplayEquippableItems();
                     Debug.Log("Removing used item from inventory");
                 }
-                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
-                if (initialPageIndex >= _equippableItems.Count)
+                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * currentPage);
+                if (initialPageIndex >= items.Count)
                 {
-                    _currentEquippablePageNumber--;
-                    if (_currentEquippablePageNumber < 0) _currentEquippablePageNumber = 0;
+                    currentPage--;
+                    if (currentPage < 0) currentPage = 0;
                     OnlyDisplayCurrentPage();
                     DisplayEquippableItems();
                 }
@@ -1676,6 +1639,15 @@ public class Inventory : MonoBehaviour
         else
         {
             errorsString += "Unable to load cursor\n";
+        }
+        obj = canvasChildren.Find(x => x.name == saveData.equippableCursor);
+        if (obj != null && _useDefaultDisplay)
+        {
+            equippableCursor = obj;
+        }
+        else
+        {
+            errorsString += "Unable to load equippable cursor\n";
         }
         name = saveData.name;
 
