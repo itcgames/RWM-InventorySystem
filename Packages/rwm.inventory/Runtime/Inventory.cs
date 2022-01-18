@@ -78,6 +78,7 @@ public class Inventory : MonoBehaviour
     public bool forceOverwrite;
     public string pathToLoadJsonFrom;
     public string jsonToLoadFrom;
+    public bool alwaysUseHotbar;
 
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
@@ -148,6 +149,24 @@ public class Inventory : MonoBehaviour
             }
             totalItemsText.gameObject.SetActive(false);
         }
+        if (alwaysUseHotbar && _useDefaultDisplay)
+        {
+            _currentEquippableName.gameObject.SetActive(true);
+            _currentEquippableDescription.gameObject.SetActive(true);
+            _currentEquippableAmount.gameObject.SetActive(true);
+            if (_equippableItems != null)
+            {
+                foreach (GameObject item in _equippableItems)
+                {
+                    item.SetActive(true);
+                }
+            }
+            equippableCursor.gameObject.SetActive(true);
+            DisplayInfoOnCurrentEquippable();
+            DisplayEquippableItems();
+        }
+
+
     }
 
     private void Update()
@@ -322,12 +341,12 @@ public class Inventory : MonoBehaviour
 
     public void UseItem()
     {
-        UseItemAtPosition(ref _currentlySelectedIndex, ref _items, ref _currentlySelectedIndex);
+        UseItemAtPosition(ref _currentlySelectedIndex, ref _items, ref _currentlySelectedIndex, false);
     }
 
     public void UseEquippable()
     {
-        UseItemAtPosition(ref _currentlySelectedEquippable, ref _equippableItems, ref _currentEquippablePageNumber);
+        UseItemAtPosition(ref _currentlySelectedEquippable, ref _equippableItems, ref _currentEquippablePageNumber, true);
     }
 
     public void UseEquippableAtCurrentPageIndex(int index)
@@ -337,7 +356,7 @@ public class Inventory : MonoBehaviour
         int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
         int itemIndex = initialPageIndex + index;
         if (itemIndex >= _equippableItems.Count) return;
-        UseItemAtPosition(ref itemIndex, ref _equippableItems, ref _currentEquippablePageNumber);
+        UseItemAtPosition(ref itemIndex, ref _equippableItems, ref _currentEquippablePageNumber, true);
         if(_currentlySelectedEquippable >= _equippableItems.Count)
         {
             _currentlySelectedEquippable--;
@@ -345,9 +364,9 @@ public class Inventory : MonoBehaviour
         }
     }
 
-    private void UseItemAtPosition(ref int index, ref List<GameObject> items, ref int currentPage)
+    private void UseItemAtPosition(ref int index, ref List<GameObject> items, ref int currentPage, bool isEquippable)
     {
-        if (_isOpen)
+        if (_isOpen || (isEquippable && alwaysUseHotbar))
         {
             if (items == null) return;
             if (items.Count == 0) return;
@@ -421,7 +440,24 @@ public class Inventory : MonoBehaviour
                 }
             }
         }
+        if(_equippableItems != null)
+        {
+            int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
+            int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+            if (lastPageIndex >= _equippableItems.Count)
+            {
+                lastPageIndex = _equippableItems.Count - 1;
+            }
 
+            List<GameObject> currentPage = _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), (lastPageIndex - initialPageIndex) + 1);
+            if (_isOpen)
+            {
+                foreach (GameObject item in currentPage)
+                {
+                    item.SetActive(true);
+                }
+            }
+        }
         if(_useDefaultDisplay)
         {
             pagesText.gameObject.SetActive(true);
@@ -476,20 +512,23 @@ public class Inventory : MonoBehaviour
             totalItemsText.gameObject.SetActive(false);
             if (cursor != null)
                 cursor.SetActive(false);
-            if (equippableCursor != null)
-                equippableCursor.SetActive(false);
             if (_currentItemName != null)
                 _currentItemName.gameObject.SetActive(false);
             if (_currentItemDescription != null)
                 _currentItemDescription.gameObject.SetActive(false);
             if (_currentItemAmount != null)
                 _currentItemAmount.gameObject.SetActive(false);
-            if(_currentEquippableName != null)
-                _currentEquippableName.gameObject.SetActive(false);
-            if(_currentEquippableDescription != null)
-                _currentEquippableDescription.gameObject.SetActive(false);
-            if(_currentEquippableAmount != null)
-                _currentEquippableAmount.gameObject.SetActive(false);
+            if(!alwaysUseHotbar)
+            {
+                if (_currentEquippableName != null)
+                    _currentEquippableName.gameObject.SetActive(false);
+                if (_currentEquippableDescription != null)
+                    _currentEquippableDescription.gameObject.SetActive(false);
+                if (_currentEquippableAmount != null)
+                    _currentEquippableAmount.gameObject.SetActive(false);
+                if (equippableCursor != null)
+                    equippableCursor.SetActive(false);
+            }
         }
     }
 
@@ -519,7 +558,7 @@ public class Inventory : MonoBehaviour
 
     public void GoToNextEquippable()
     {
-        if (_isOpen)
+        if (_isOpen || alwaysUseHotbar)
         {
             int indexOfLastItemOnCurrentPage = ((maxItemsPerRow * maxRows) * (_currentEquippablePageNumber + 1)) - 1;
             if (_equippableItems.Count > _currentlySelectedEquippable + 1)
@@ -567,7 +606,7 @@ public class Inventory : MonoBehaviour
 
     public void GoToPreviousEquippable()
     {
-        if (_isOpen)
+        if (_isOpen || alwaysUseHotbar)
         {
             int indexOfFirstItemOnCurrentPage = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
             if (_currentlySelectedEquippable > 0)
@@ -680,7 +719,7 @@ public class Inventory : MonoBehaviour
                 script.SetCanvasAsParent();
             }
             listToAddTo.Add(newItem);
-            if (!_isOpen)
+            if (!_isOpen && !(isEquippable && alwaysUseHotbar))
             {
                 listToAddTo[listToAddTo.Count - 1].SetActive(false);
             }
@@ -726,7 +765,7 @@ public class Inventory : MonoBehaviour
                 if (equippableCursor != null)
                     equippableCursor.transform.position = listToAddTo[_currentEquippablePageNumber].transform.position;
             }
-            if (!_isOpen)
+            if (!_isOpen && !(isEquippable && alwaysUseHotbar))
             {
                 listToAddTo[listToAddTo.Count - 1].SetActive(false);
             }
@@ -768,7 +807,7 @@ public class Inventory : MonoBehaviour
                     newScript.SetCanvasAsParent();
                 }
                 listToAddTo.Add(newobj);
-                if (!_isOpen)
+                if (!_isOpen && !(isEquippable && alwaysUseHotbar))
                 {
                     listToAddTo[listToAddTo.Count - 1].SetActive(false);
                 }                
@@ -788,7 +827,7 @@ public class Inventory : MonoBehaviour
                 }
 
                 listToAddTo.Add(newobj);
-                if (!_isOpen)
+                if (!_isOpen && !(isEquippable && alwaysUseHotbar))
                 {
                     listToAddTo[listToAddTo.Count - 1].SetActive(false);
                 }
@@ -820,7 +859,7 @@ public class Inventory : MonoBehaviour
         script.SetCanvasAsParent();
         listToAddTo.Add(newItem);
         if(_useDefaultDisplay) OnlyDisplayCurrentPage();
-        if (!_isOpen)
+        if (!_isOpen && !(isEquippable && alwaysUseHotbar))
         {
             listToAddTo[listToAddTo.Count - 1].SetActive(false);
         }
@@ -894,7 +933,7 @@ public class Inventory : MonoBehaviour
         int count = (lastPageIndex - initialPageIndex) + 1;
         Debug.Log("Count: " + count);
         List<GameObject> currentPage = _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
-        if (_isOpen)
+        if (_isOpen || alwaysUseHotbar)
         {
             foreach (GameObject item in currentPage)
             {
@@ -1043,11 +1082,16 @@ public class Inventory : MonoBehaviour
                 _currentItemAmount.gameObject.SetActive(false);
                 _currentItemName.gameObject.SetActive(false);
                 _currentItemDescription.gameObject.SetActive(false);
-                _currentEquippableName.gameObject.SetActive(false);
-                _currentEquippableDescription.gameObject.SetActive(false);
-                _currentEquippableAmount.gameObject.SetActive(false);
+                if(!alwaysUseHotbar)
+                {
+                    _currentEquippableName.gameObject.SetActive(false);
+                    _currentEquippableDescription.gameObject.SetActive(false);
+                    _currentEquippableAmount.gameObject.SetActive(false);
+                    equippableCursor.gameObject.SetActive(false);
+                }
+
                 cursor.gameObject.SetActive(false);
-                equippableCursor.gameObject.SetActive(false);
+
                 pagesText.gameObject.SetActive(false);
                 totalItemsText.gameObject.SetActive(false);
                 
@@ -1086,6 +1130,22 @@ public class Inventory : MonoBehaviour
                 OnlyDisplayCurrentPage();
                 DisplayEquippableItems();
             }
+        }
+        if (alwaysUseHotbar && _useDefaultDisplay)
+        {
+            _currentEquippableName.gameObject.SetActive(true);
+            _currentEquippableDescription.gameObject.SetActive(true);
+            _currentEquippableAmount.gameObject.SetActive(true);
+            if (_equippableItems != null)
+            {
+                foreach (GameObject item in _equippableItems)
+                {
+                    item.SetActive(true);
+                }
+            }
+            equippableCursor.gameObject.SetActive(true);
+            DisplayInfoOnCurrentEquippable();
+            DisplayEquippableItems();
         }
     }
 
@@ -1347,6 +1407,7 @@ public class Inventory : MonoBehaviour
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
         data.name = gameObject.name;
+        data.alwaysUseHotbar = alwaysUseHotbar;
         if (!string.IsNullOrEmpty(errorsString))
         {
             string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventorySavingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
@@ -1631,6 +1692,7 @@ public class Inventory : MonoBehaviour
         columnOffset = saveData.columnOffset;
         maxItemsPerRow = saveData.maxItemsPerRow;
         maxRows = saveData.maxRows;
+        alwaysUseHotbar = saveData.alwaysUseHotbar;
         obj = canvasChildren.Find(x => x.name == saveData.cursor);
         if(obj != null && _useDefaultDisplay)
         {
@@ -1711,4 +1773,5 @@ class InventorySaveData
     public string currentEquippableDescription;
     public uint maxEquippableStackAmount;
     public string currentEquippableAmount;
+    public bool alwaysUseHotbar;
 }

@@ -1251,6 +1251,7 @@ MonoBehaviour:
   forceOverwrite: 1
   pathToLoadJsonFrom: json/
   jsonToLoadFrom: test
+  alwaysUseHotbar: 1
 --- !u!4 &627402343
 Transform:
   m_ObjectHideFlags: 0

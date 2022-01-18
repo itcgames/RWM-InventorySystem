@@ -28,7 +28,7 @@
             "isStackable": true,
             "usingDefaultDisplay": false,
             "sprite": "potion",
-            "image": "potion(Clone)",
+            "image": "potion",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -48,7 +48,7 @@
             "isStackable": true,
             "usingDefaultDisplay": false,
             "sprite": "wooden-shield",
-            "image": "shield(Clone)",
+            "image": "shield",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -71,7 +71,7 @@
             "isStackable": false,
             "usingDefaultDisplay": false,
             "sprite": "white-sword",
-            "image": "sword(Clone)",
+            "image": "sword",
             "row": 0,
             "col": 0,
             "canvas": "Canvas",
@@ -117,5 +117,6 @@
     "currentEquippableName": "CurrentItemNameHotbar",
     "currentEquippableDescription": "CurrentItemDescriptionHotbar",
     "maxEquippableStackAmount": 12,
-    "currentEquippableAmount": "CurrentItemAmountHotbar"
+    "currentEquippableAmount": "CurrentItemAmountHotbar",
+    "alwaysUseHotbar": false
 }
