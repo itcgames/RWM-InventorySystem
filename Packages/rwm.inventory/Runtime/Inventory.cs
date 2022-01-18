@@ -58,7 +58,6 @@ public class Inventory : MonoBehaviour
     private int _totalNumberOfPages = 0;
     private int _currentlySelectedEquippable = -1;
     private int _currentEquippablePageNumber = 0;
-    private int _totalEquippableNumberOfPages = 0;
     public Vector3 initialItemPosition = new Vector3(0,0,0);
     public Vector3 initialEquippableItemPosition = new Vector3(0, 0, 0);
     public Transform initialTransform;
@@ -233,6 +232,30 @@ public class Inventory : MonoBehaviour
         return null;
     }
 
+    public GameObject GetCurrentlySelectedEquippable()
+    {
+        if (_equippableItems != null && _currentlySelectedEquippable >= 0 && _currentlySelectedEquippable < _equippableItems.Count)
+        {
+            return _equippableItems[_currentlySelectedEquippable];
+        }
+        return null;
+    }
+
+    public List<GameObject> GetCurrentPageOfEquippables()
+    {
+        if (_equippableItems == null || _equippableItems.Count == 0) return new List<GameObject>();
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
+        int lastPageIndex = initialPageIndex + (maxItemsPerRow * maxRows) - 1;
+        if (lastPageIndex >= _equippableItems.Count)
+        {
+            lastPageIndex = _equippableItems.Count - 1;
+        }
+        if (lastPageIndex < 0) return new List<GameObject>();
+        int count = (lastPageIndex - initialPageIndex) + 1;
+        Debug.Log("Count: " + count);
+        return _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
+    }
+
     public void AddItem(GameObject newItem, uint amount)
     {
         InventoryItem script = newItem.GetComponent<InventoryItem>();
@@ -299,58 +322,37 @@ public class Inventory : MonoBehaviour
 
     public void UseItem()
     {
-        if (_isOpen)
-        {
-            if (_items == null) return;
-            if (_items.Count == 0) return;
-            if (_items[_currentlySelectedIndex] == null) return;
-            InventoryItem item = _items[_currentlySelectedIndex].GetComponent<InventoryItem>();
-            bool wasUsed = true;
-            if(item.useFunction != null)
-            {
-                Debug.Log("has function");
-                wasUsed = item.useFunction();
-            }
-            else
-            {
-                if (_usedItems == null) _usedItems = new List<GameObject>();
-                _usedItems.Add(_items[_currentlySelectedIndex]);
-            }
-            if(wasUsed)
-            {
-                item.NumberOfItems--;
-                DisplayInfoOnCurrentItem();
-                if (item.NumberOfItems <= 0)
-                {
-                    GameObject obj = _items[_currentlySelectedIndex];
-                    _items.Remove(_items[_currentlySelectedIndex]);
-                    Destroy(obj);
-                    _currentlySelectedIndex--;
-                    if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
-                    OnlyDisplayCurrentPage();
-                    DisplayEquippableItems();
-                    Debug.Log("Removing used item from inventory");
-                }
-                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
-                if(initialPageIndex >= _items.Count)
-                {
-                    _currentPageNumber--;
-                    if (_currentPageNumber < 0) _currentPageNumber = 0;
-                    OnlyDisplayCurrentPage();
-                    DisplayEquippableItems();
-                }
-            }  
-        }
+        UseItemAtPosition(ref _currentlySelectedIndex, ref _items, ref _currentlySelectedIndex);
     }
 
     public void UseEquippable()
     {
+        UseItemAtPosition(ref _currentlySelectedEquippable, ref _equippableItems, ref _currentEquippablePageNumber);
+    }
+
+    public void UseEquippableAtCurrentPageIndex(int index)
+    {
+        if (_equippableItems == null || _equippableItems.Count == 0) return;
+        if (index < 0 || index > maxItemsPerRow * maxRows || index >= _equippableItems.Count) return;
+        int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
+        int itemIndex = initialPageIndex + index;
+        if (itemIndex >= _equippableItems.Count) return;
+        UseItemAtPosition(ref itemIndex, ref _equippableItems, ref _currentEquippablePageNumber);
+        if(_currentlySelectedEquippable >= _equippableItems.Count)
+        {
+            _currentlySelectedEquippable--;
+            if (_currentlySelectedEquippable < 0) _currentlySelectedEquippable = 0;
+        }
+    }
+
+    private void UseItemAtPosition(ref int index, ref List<GameObject> items, ref int currentPage)
+    {
         if (_isOpen)
         {
-            if (_equippableItems == null) return;
-            if (_equippableItems.Count == 0) return;
-            if (_equippableItems[_currentlySelectedEquippable] == null) return;
-            InventoryItem item = _equippableItems[_currentlySelectedEquippable].GetComponent<InventoryItem>();
+            if (items == null) return;
+            if (items.Count == 0) return;
+            if (items[index] == null) return;
+            InventoryItem item = items[index].GetComponent<InventoryItem>();
             bool wasUsed = true;
             if (item.useFunction != null)
             {
@@ -360,28 +362,28 @@ public class Inventory : MonoBehaviour
             else
             {
                 if (_usedItems == null) _usedItems = new List<GameObject>();
-                _usedItems.Add(_equippableItems[_currentlySelectedEquippable]);
+                _usedItems.Add(items[index]);
             }
             if (wasUsed)
             {
-                item.NumberOfItems = item.NumberOfItems - 1;
-                DisplayInfoOnCurrentEquippable();
+                item.UseItem();
+                DisplayInfoOnCurrentItem();
                 if (item.NumberOfItems <= 0)
                 {
-                    GameObject obj = _equippableItems[_currentlySelectedEquippable];
-                    _equippableItems.Remove(_equippableItems[_currentlySelectedEquippable]);
+                    GameObject obj = items[index];
+                    items.Remove(items[index]);
                     Destroy(obj);
-                    _currentlySelectedEquippable--;
-                    if (_currentlySelectedEquippable < 0) _currentlySelectedEquippable = 0;
+                    index--;
+                    if (index < 0) index = 0;
                     OnlyDisplayCurrentPage();
                     DisplayEquippableItems();
                     Debug.Log("Removing used item from inventory");
                 }
-                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
-                if (initialPageIndex >= _equippableItems.Count)
+                int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * currentPage);
+                if (initialPageIndex >= items.Count)
                 {
-                    _currentEquippablePageNumber--;
-                    if (_currentEquippablePageNumber < 0) _currentEquippablePageNumber = 0;
+                    currentPage--;
+                    if (currentPage < 0) currentPage = 0;
                     OnlyDisplayCurrentPage();
                     DisplayEquippableItems();
                 }
@@ -933,14 +935,14 @@ public class Inventory : MonoBehaviour
         }
         if(displayingMainInventory)
         {
-            if (cursor != null)
+            if (cursor != null && _items != null && _items.Count > 0)
                 cursor.transform.position = _items[_currentlySelectedIndex].transform.position;
             if (_displayCurrentItemInfo)
                 DisplayInfoOnCurrentItem();
         }
         else
         {
-            if (equippableCursor != null)
+            if (equippableCursor != null && _equippableItems != null && _equippableItems.Count > 0)
                 equippableCursor.transform.position = _equippableItems[_currentlySelectedEquippable].transform.position;
             if (_displayCurrentItemInfo)
                 DisplayInfoOnCurrentEquippable();
@@ -1024,9 +1026,19 @@ public class Inventory : MonoBehaviour
         {
             if(_useDefaultDisplay)
             {
-                foreach(GameObject item in _items)
+                if(_items != null)
                 {
-                    item.SetActive(false);
+                    foreach (GameObject item in _items)
+                    {
+                        item.SetActive(false);
+                    }
+                }
+                if(_equippableItems != null)
+                {
+                    foreach (GameObject item in _equippableItems)
+                    {
+                        item.SetActive(false);
+                    }
                 }
                 _currentItemAmount.gameObject.SetActive(false);
                 _currentItemName.gameObject.SetActive(false);
@@ -1045,6 +1057,20 @@ public class Inventory : MonoBehaviour
         {
             if(_useDefaultDisplay)
             {
+                if (_items != null)
+                {
+                    foreach (GameObject item in _items)
+                    {
+                        item.SetActive(true);
+                    }
+                }
+                if (_equippableItems != null)
+                {
+                    foreach (GameObject item in _equippableItems)
+                    {
+                        item.SetActive(true);
+                    }
+                }
                 _currentItemAmount.gameObject.SetActive(true);
                 _currentItemName.gameObject.SetActive(true);
                 _currentItemDescription.gameObject.SetActive(true);
@@ -1088,6 +1114,10 @@ public class Inventory : MonoBehaviour
             data = JsonUtility.FromJson<InventorySaveData>(json);
         }
         LoadFromSaveData(data);
+        if (_items == null || _items.Count == 0)
+            _currentlySelectedIndex = -1;
+        if (_equippableItems == null || _equippableItems.Count == 0)
+            _currentlySelectedEquippable = -1;
         HideOrShowInventory();
         return;
     }
@@ -1209,7 +1239,50 @@ public class Inventory : MonoBehaviour
             }
             data.rowOffset = rowOffset;
             data.columnOffset = columnOffset;
+            if(equippableCursor != null)
+            {
+                data.equippableCursor = equippableCursor.name;
+            }
+            else
+            {
+                errorsString += "Equippable cursor does not exist.\n";
+            }
+            if (initialEquippableTransform != null)
+            {
+                data.initialEquippableTransform = initialEquippableTransform.name;
+            }
+            else
+            {
+                errorsString += "Initial Equippable Transform Does Not Exist.\n";
+            }
+            if (_currentEquippableName != null)
+            {
+                data.currentEquippableName = _currentEquippableName.name;
+            }
+            else
+            {
+                errorsString += "Current Item Name Text Does Not Exist.\n";
+            }
+            if (_currentEquippableDescription != null)
+            {
+                data.currentEquippableDescription = _currentEquippableDescription.name;
+            }
+            else
+            {
+                errorsString += "Current Item Description Text Does Not Exist.\n";
+            }
+            if (_currentEquippableAmount != null)
+            {
+                data.currentEquippableAmount = _currentEquippableAmount.name;
+            }
+            else
+            {
+                errorsString += "Current Item Name Text Does Not Exist.\n";
+            }
         }
+        data.currentlySelectedEquippable = _currentlySelectedEquippable;
+        data.currentEquippablePageNumber = _currentEquippablePageNumber;
+        data.maxEquippableStackAmount = _maxEquippableStackAmount;
         data.currentDescriptionOffset = _currentDescriptionOffset;
         data.currentItemAmount = _currentItemAmount.name;
         data.currentAmountOffset = _currentAmountOffset;
@@ -1293,7 +1366,9 @@ public class Inventory : MonoBehaviour
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
         _currentNameOffset = saveData.currentNameOffset;
-
+        _currentlySelectedEquippable = saveData.currentlySelectedEquippable;
+        _currentEquippablePageNumber = saveData.currentEquippablePageNumber;
+        _maxEquippableStackAmount = saveData.maxEquippableStackAmount;
         List<GameObject> canvasChildren = new List<GameObject>();
         GameObject obj;
         GameObject canvas = GameObject.Find("Canvas");
@@ -1305,6 +1380,18 @@ public class Inventory : MonoBehaviour
                 for (int i = 0; i < canvas.transform.childCount; ++i)
                 {
                     canvasChildren.Add(canvas.transform.GetChild(i).gameObject);
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.initialEquippableTransform);
+                if(obj != null)
+                {
+                    initialEquippableTransform = obj.transform;
+                }
+                else
+                {
+                    errorsString += "Unable to load initial transform\n";
+                    newTextObject = new GameObject(saveData.initialEquippableTransform);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    initialEquippableTransform = newTextObject.transform;
                 }
                 obj = canvasChildren.Find(x => x.name == saveData.initialTransform);
                 if (obj != null)
@@ -1333,6 +1420,21 @@ public class Inventory : MonoBehaviour
                     newText.color = Color.black;
                     _currentItemName = newText;
                 }
+                obj = canvasChildren.Find(x => x.name == saveData.currentEquippableName);
+                if (obj != null)
+                {
+                    _currentEquippableName = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to current item name\n";
+                    newTextObject = new GameObject(saveData.currentEquippableName);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentEquippableName = newText;
+                }
 
                 obj = canvasChildren.Find(x => x.name == saveData.currentItemDescription);
                 if (obj != null)
@@ -1348,6 +1450,21 @@ public class Inventory : MonoBehaviour
                     newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
                     newText.color = Color.black;
                     _currentItemDescription = newText;
+                }
+                obj = canvasChildren.Find(x => x.name == saveData.currentEquippableDescription);
+                if (obj != null)
+                {
+                    _currentEquippableDescription = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to current item description\n";
+                    newTextObject = new GameObject(saveData.currentEquippableDescription);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentEquippableDescription = newText;
                 }
                 _currentDescriptionOffset = saveData.currentDescriptionOffset;
                 obj = canvasChildren.Find(x => x.name == saveData.currentItemAmount);
@@ -1365,12 +1482,26 @@ public class Inventory : MonoBehaviour
                     newText.color = Color.black;
                     _currentItemAmount = newText;
                 }
-            }
-
-           
+                obj = canvasChildren.Find(x => x.name == saveData.currentEquippableAmount);
+                if (obj != null)
+                {
+                    _currentEquippableAmount = obj.GetComponent<Text>();
+                }
+                else
+                {
+                    errorsString += "Unable to load current item amount\n";
+                    newTextObject = new GameObject(saveData.currentEquippableAmount);
+                    newTextObject.transform.SetParent(canvas.transform);
+                    Text newText = newTextObject.AddComponent<Text>();
+                    newText.font = Resources.GetBuiltinResource(typeof(Font), "Arial.ttf") as Font;
+                    newText.color = Color.black;
+                    _currentEquippableAmount = newText;
+                }
+            }           
             _currentAmountOffset = saveData.currentAmountOffset;
         }
-        _items.ForEach(x => Destroy(x));
+        if(_items != null)
+            _items.ForEach(x => Destroy(x));
         _items = new List<GameObject>();
         spriteLocations = saveData.spriteLocations;
         int currentIndex = 0;
@@ -1426,7 +1557,8 @@ public class Inventory : MonoBehaviour
             }
             currentIndex++;
         }
-        _equippableItems.ForEach(x => Destroy(x));
+        if(_equippableItems != null)
+            _equippableItems.ForEach(x => Destroy(x));
         _equippableItems = new List<GameObject>();
         foreach (ItemData item in saveData.equippedItems)
         {
@@ -1508,8 +1640,21 @@ public class Inventory : MonoBehaviour
         {
             errorsString += "Unable to load cursor\n";
         }
+        obj = canvasChildren.Find(x => x.name == saveData.equippableCursor);
+        if (obj != null && _useDefaultDisplay)
+        {
+            equippableCursor = obj;
+        }
+        else
+        {
+            errorsString += "Unable to load equippable cursor\n";
+        }
         name = saveData.name;
 
+        if (_currentlySelectedIndex == -1)
+            _items = null;
+        if (_currentlySelectedEquippable == -1)
+            _equippableItems = null;
         if(!string.IsNullOrEmpty(errorsString))
         {
             string fileName = DateTime.Now.Ticks.GetHashCode().ToString("x").ToUpper() + "-" + "InventoryLoadingLogFile" + "-" + DateTime.Now.ToString("dd-MM-yyyy") + ".txt";
@@ -1547,6 +1692,7 @@ class InventorySaveData
     public int currentPageNumber = 0;
     public int totalNumberOfPages = 0;
     public Vector3 initialItemPosition = new Vector3(0, 0, 0);
+    public Vector3 initialEquippableItemPosition = new Vector3(0, 0, 0);
     public string initialTransform;
     public string pagesText;
     public string totalItemsText;
@@ -1557,4 +1703,12 @@ class InventorySaveData
     public string cursor;
     public string spriteLocations;
     public string name;
+    public int currentlySelectedEquippable;
+    public int currentEquippablePageNumber;
+    public string initialEquippableTransform;
+    public string equippableCursor;
+    public string currentEquippableName;
+    public string currentEquippableDescription;
+    public uint maxEquippableStackAmount;
+    public string currentEquippableAmount;
 }
