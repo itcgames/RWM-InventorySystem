@@ -49,6 +49,7 @@ public class InventoryItem : MonoBehaviour
     public delegate bool Use();//should return true if succeeded, otherwise false
     public Use useFunction;
     private Vector3 _position;
+    public bool equippableItem;
 
     [Tooltip("List the names of any of the other scripts attached to the item so that they can be loaded back in. Any data attached to these scripts won't be saved alongside the inventory.")]
     public Type[] scripts;
@@ -151,6 +152,11 @@ public class InventoryItem : MonoBehaviour
         }
     }
 
+    public void UseItem()
+    {
+        _numberOfItems--;
+    }
+
     public ItemData CreateSaveData(bool usingDefaultDisplay)
     {
         savingErrors = "";
@@ -161,6 +167,7 @@ public class InventoryItem : MonoBehaviour
         data.numberOfItems = _numberOfItems;
         data.maxItemsPerStack = _maxItemsPerStack;
         data.isStackable = _isStackable;
+        data.equippableItem = equippableItem;
         if(usingDefaultDisplay)
         {
             if(gameObject.GetComponent<Image>().sprite != null)
@@ -199,6 +206,7 @@ public class InventoryItem : MonoBehaviour
     {
         loadingErrors = "";
         canvas = GameObject.Find("Canvas").GetComponent<Canvas>();
+        equippableItem = data.equippableItem;
         if(canvas == null)
         {
             loadingErrors += "No Canvas Found For Item\n";
@@ -317,4 +325,5 @@ public class ItemData
     public string canvas;
     public InventoryItem.Use useFunction;
     public Vector3 position;
+    public bool equippableItem;
 }

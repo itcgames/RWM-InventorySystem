@@ -107,6 +107,15 @@ public class PlayerScript : MonoBehaviour
             {
                 inventory.GoToItemBelow();
             }
+
+            if(Input.GetKeyDown(KeyCode.Alpha1) || Input.GetKeyDown(KeyCode.Keypad1))
+            {
+                inventory.UseEquippableAtCurrentPageIndex(0);
+            }
+            else if (Input.GetKeyDown(KeyCode.Alpha2) || Input.GetKeyDown(KeyCode.Keypad2))
+            {
+                inventory.UseEquippableAtCurrentPageIndex(1);
+            }
             currentIndex.gameObject.SetActive(true);
         }
         else
