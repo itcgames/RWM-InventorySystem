@@ -34,6 +34,20 @@ namespace Tests
             InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
             Assert.AreEqual(1, itemScript.NumberOfItems);
         }
+
+        [UnityTest]
+        public IEnumerator AddItemToEquippable()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItemToEquippable(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.EquippedItems.Count, 1);
+            InventoryItem itemScript = inventory.EquippedItems[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+        }
         #endregion
 
         #region stack tests
@@ -272,6 +286,22 @@ namespace Tests
             yield return new WaitForSeconds(0.1f);
             Assert.IsNull(inventory.UsedItems);
             Assert.AreEqual(0, inventory.Items.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator UseEquippableAtPageIndex()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            GameObject item = CreateItem(5, true, "item");
+            item.GetComponent<InventoryItem>().useFunction += UseItem;
+            inventory.AddItemToEquippable(item, 1);
+            inventory.OpenInventory();
+            inventory.UseEquippableAtCurrentPageIndex(0);
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.UsedItems);
+            Assert.AreEqual(0, inventory.EquippedItems.Count);
         }
         #endregion
 
