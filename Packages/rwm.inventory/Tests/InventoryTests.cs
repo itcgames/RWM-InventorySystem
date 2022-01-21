@@ -120,6 +120,135 @@ namespace Tests
         }
 
         [UnityTest]
+        public IEnumerator TradeOneItem()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            bool succeeded = inventory.TradeItems(item.GetComponent<InventoryItem>().Name, 1, itemToTrade, 2);
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().Name, "other");
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 2);
+        }
+
+        [UnityTest]
+        public IEnumerator TryTradeMoreThanPossible()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            bool succeeded = inventory.TradeItems(item.GetComponent<InventoryItem>().Name, 2, itemToTrade, 2);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().Name, "item");
+        }
+
+        [UnityTest]
+        public IEnumerator TryTradeInvalidItem()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            bool succeeded = inventory.TradeItems("invalid", 2, itemToTrade, 2);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().Name, "item");
+        }
+
+        [UnityTest]
+        public IEnumerator TryTradeWithNotEnoughSpace()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 2);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            bool succeeded = inventory.TradeItems(item.GetComponent<InventoryItem>().Name, 1, itemToTrade, 2);
+            Assert.IsFalse(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().Name, "item");
+        }
+
+        [UnityTest]
+        public IEnumerator TradeItemAlreadyInInventory()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(2);
+            GameObject item = CreateItem(5, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 2);
+            inventory.AddItem(itemToTrade, 2);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 2);
+            bool succeeded = inventory.TradeItems(item.GetComponent<InventoryItem>().Name, 2, itemToTrade, 2);
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().Name, "other");
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 4);
+        }
+
+        [UnityTest]
+        public IEnumerator CreateNewStackOfTradingItemAlreadyInInventory()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(2);
+            GameObject item = CreateItem(5, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 2);
+            inventory.AddItem(itemToTrade, 4);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 2);
+            bool succeeded = inventory.TradeItems(item.GetComponent<InventoryItem>().Name, 2, itemToTrade, 2);
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 2);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().Name, "other");
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 5);
+            Assert.AreEqual(inventory.Items[1].GetComponent<InventoryItem>().Name, "other");
+            Assert.AreEqual(inventory.Items[1].GetComponent<InventoryItem>().NumberOfItems, 1);
+        }
+
+        [UnityTest]
+        public IEnumerator TradePiecesWhenCreatingNewSpaceFromTradedItem()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(4);
+            GameObject item = CreateItem(2, true, "item");
+            GameObject itemToTrade = CreateItem(5, true, "other");
+            inventory.AddItem(item, 5);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 3);
+            bool succeeded = inventory.TradeItems(item.GetComponent<InventoryItem>().Name, 3, itemToTrade, 12);
+            Assert.IsTrue(succeeded);
+            Assert.AreEqual(inventory.Items.Count, 4);
+            Assert.AreEqual(inventory.Items[1].GetComponent<InventoryItem>().Name, "other");
+            Assert.AreEqual(inventory.Items[1].GetComponent<InventoryItem>().NumberOfItems, 5);
+            Assert.AreEqual(inventory.Items[3].GetComponent<InventoryItem>().Name, "other");
+            Assert.AreEqual(inventory.Items[3].GetComponent<InventoryItem>().NumberOfItems, 2);
+        }
+
+        [UnityTest]
         public IEnumerator CannotRemoveItemWhenInventoryEmpty()
         {
             // Use the Assert class to test conditions
