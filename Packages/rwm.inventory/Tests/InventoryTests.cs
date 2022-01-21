@@ -34,6 +34,141 @@ namespace Tests
             InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
             Assert.AreEqual(1, itemScript.NumberOfItems);
         }
+
+        [UnityTest]
+        public IEnumerator AddItemToEquippable()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItemToEquippable(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.EquippedItems.Count, 1);
+            InventoryItem itemScript = inventory.EquippedItems[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+        }
+
+        [UnityTest]
+        public IEnumerator RemoveItemFromInventoryReturnFalseIfRemoveMoreThanThereAre()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            bool result = inventory.RemoveItem("item", 5);
+            Assert.IsFalse(result);
+            Assert.AreEqual(inventory.Items.Count, 1);
+        }
+
+        [UnityTest]
+        public IEnumerator RemoveItemFromInventory()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            bool result = inventory.RemoveItem("item", 1);
+            Assert.IsTrue(result);
+            Assert.AreEqual(inventory.Items.Count, 0);
+        }
+
+        [UnityTest]
+        public IEnumerator RemoveMultipleStacksFromInventory()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(4);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 16);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 4);
+            InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(5, itemScript.NumberOfItems);
+            bool result = inventory.RemoveItem("item", 15);
+            Assert.IsTrue(result);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 1);
+        }
+
+        [UnityTest]
+        public IEnumerator CannotRemoveItemThatDoesntExist()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            bool result = inventory.RemoveItem("null", 1);
+            Assert.IsFalse(result);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            Assert.AreEqual(inventory.Items[0].GetComponent<InventoryItem>().NumberOfItems, 1);
+        }
+
+        [UnityTest]
+        public IEnumerator CannotRemoveItemWhenInventoryEmpty()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            bool result = inventory.RemoveItem("item", 1);
+            Assert.IsFalse(result);
+            Assert.IsNull(inventory.Items);
+        }
+        #endregion
+
+        #region getter tests
+        [UnityTest]
+        public IEnumerator GetCurrentlySelectedObject()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            GameObject selectedObject = inventory.GetCurrentlySelectedObject();
+            Assert.IsNull(selectedObject);
+            inventory.OpenInventory();
+            selectedObject = inventory.GetCurrentlySelectedObject();
+            Assert.AreEqual(selectedObject.GetComponent<InventoryItem>().Name, itemScript.Name);
+        }
+        [UnityTest]
+        public IEnumerator GetCurrentlySelectedObjectWhenClosed()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItem(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.AreEqual(inventory.Items.Count, 1);
+            InventoryItem itemScript = inventory.Items[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            GameObject selectedObject = inventory.GetCurrentlySelectedObjectWhenClosed();
+            Assert.AreEqual(selectedObject.GetComponent<InventoryItem>().Name, itemScript.Name);
+            inventory.OpenInventory();
+            selectedObject = inventory.GetCurrentlySelectedObjectWhenClosed();
+            Assert.IsNull(selectedObject);
+        }
         #endregion
 
         #region stack tests
@@ -272,6 +407,22 @@ namespace Tests
             yield return new WaitForSeconds(0.1f);
             Assert.IsNull(inventory.UsedItems);
             Assert.AreEqual(0, inventory.Items.Count);
+        }
+
+        [UnityTest]
+        public IEnumerator UseEquippableAtPageIndex()
+        {
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            yield return new WaitForSeconds(0.1f);
+            GameObject item = CreateItem(5, true, "item");
+            item.GetComponent<InventoryItem>().useFunction += UseItem;
+            inventory.AddItemToEquippable(item, 1);
+            inventory.OpenInventory();
+            inventory.UseEquippableAtCurrentPageIndex(0);
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.UsedItems);
+            Assert.AreEqual(0, inventory.EquippedItems.Count);
         }
         #endregion
 
