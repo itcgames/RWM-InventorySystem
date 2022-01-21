@@ -122,20 +122,80 @@ public class Inventory : MonoBehaviour
     {
         if (_items == null) return false;
         List<GameObject> itemToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == name).ToList();
-        if (itemToRemove == null || itemToRemove.Count == 0) return false;
-        int amountInInventory = (int)itemToRemove.Sum(x => x.GetComponent<InventoryItem>().NumberOfItems);
-        if (amountInInventory < amount) return false;
-        while(amount > 0)
+        bool canRemove = CanRemoveAmountOfItem(amount, itemToRemove);
+        if (!canRemove) return false;
+        while (amount > 0)
         {
-            itemToRemove[0].GetComponent<InventoryItem>().NumberOfItems--;
+            itemToRemove.Last().GetComponent<InventoryItem>().NumberOfItems--;
             amount--;
-            if(itemToRemove[0].GetComponent<InventoryItem>().NumberOfItems == 0)
+            if(itemToRemove.Last().GetComponent<InventoryItem>().NumberOfItems == 0)
             {
-                itemToRemove.RemoveAt(0);
+                itemToRemove.RemoveAt(itemToRemove.Count - 1);
                 _items.Remove(_items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name));
             }
         }
         return true;
+    }
+
+    private bool CanRemoveAmountOfItem(uint amount, List<GameObject> itemToRemove)
+    {
+        if (itemToRemove == null || itemToRemove.Count == 0) return false;
+        int amountInInventory = (int)itemToRemove.Sum(x => x.GetComponent<InventoryItem>().NumberOfItems);
+        if (amountInInventory < amount) return false;
+        return true;
+    }
+
+    public bool TradeItems(string itemToRemove, uint amountToRemove, GameObject itemToAdd, uint amountToAdd)
+    {
+        List<GameObject> itemsToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == itemToRemove).ToList();
+        bool canRemove = CanRemoveAmountOfItem(amountToRemove, itemsToRemove);
+
+        if (!canRemove) return false;
+
+        List<int> numberOfItems = new List<int>();
+
+        itemsToRemove.ForEach(x => numberOfItems.Add((int)x.GetComponent<InventoryItem>().NumberOfItems));
+        int amountOfFreedSpaces = GetAmountOfFreedSpacesInInventory(numberOfItems, (int)amountToRemove);
+        int amountOfFreeStacks = (int)(_maxStackAmount - _items.Count) + amountOfFreedSpaces;
+
+        List<GameObject> objectsAlreadyInInventory = _items.Where(x => x.GetComponent<InventoryItem>().Name == itemToAdd.GetComponent<InventoryItem>().Name).ToList();
+        int amountOfStacksToAdd = 0;
+        if(objectsAlreadyInInventory.Count > 0)
+        {
+            GameObject lastItem = objectsAlreadyInInventory.Last();
+            amountOfStacksToAdd = ((int)amountToAdd - (int)lastItem.GetComponent<InventoryItem>().NumberOfItems) / (int)itemToAdd.GetComponent<InventoryItem>().MaxItemsPerStack;
+        }
+        else
+        {
+            amountOfStacksToAdd = (int)amountToAdd / (int)itemToAdd.GetComponent<InventoryItem>().MaxItemsPerStack;
+        }
+        if (amountToAdd < itemToAdd.GetComponent<InventoryItem>().MaxItemsPerStack) amountOfStacksToAdd++;
+
+        if (amountOfStacksToAdd > amountOfFreeStacks) return false;
+        RemoveItem(itemToRemove, amountToRemove);
+        AddItem(itemToAdd, amountToAdd);
+
+        return true;
+    }
+
+    private int GetAmountOfFreedSpacesInInventory(List<int> numberOfItems, int amountToRemove)
+    {
+        int spaces = 0;
+        while(amountToRemove > 0)
+        {
+            numberOfItems[numberOfItems.Count - 1]--;
+            amountToRemove--;
+
+            for(int i = 0; i < numberOfItems.Count; i++)
+            {
+                if(numberOfItems[i] == 0)
+                {
+                    numberOfItems.RemoveAt(i);
+                    spaces++;
+                }
+            }
+        }
+        return spaces;
     }
 
     private void Start()
@@ -872,13 +932,31 @@ public class Inventory : MonoBehaviour
     private void AddNewItemToInventory(GameObject newItem, uint amount, ref List<GameObject> listToAddTo, uint maxAmountOfStacks, bool isEquippable)
     {
         if (1 + listToAddTo.Count > maxAmountOfStacks) return;//don't add to the inventory when it's full
-        newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
-        InventoryItem script = newItem.GetComponent<InventoryItem>();
-        script.Position = initialItemPosition;
-        script.SetUpDisplay();
-        script.SetParentTransform(initialTransform);
-        script.SetCanvasAsParent();
-        listToAddTo.Add(newItem);
+
+        if(amount > newItem.GetComponent<InventoryItem>().MaxItemsPerStack)
+        {
+            newItem.GetComponent<InventoryItem>().NumberOfItems = newItem.GetComponent<InventoryItem>().MaxItemsPerStack;
+            amount -= newItem.GetComponent<InventoryItem>().MaxItemsPerStack;
+            InventoryItem script = newItem.GetComponent<InventoryItem>();
+            script.Position = initialItemPosition;
+            script.SetUpDisplay();
+            script.SetParentTransform(initialTransform);
+            script.SetCanvasAsParent();
+            listToAddTo.Add(newItem);
+            AddUntilNoItemsLeft(newItem, (int)amount, ref listToAddTo, maxAmountOfStacks, isEquippable);
+        }
+        else
+        {
+            newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
+            InventoryItem script = newItem.GetComponent<InventoryItem>();
+            script.Position = initialItemPosition;
+            script.SetUpDisplay();
+            script.SetParentTransform(initialTransform);
+            script.SetCanvasAsParent();
+            listToAddTo.Add(newItem);
+        }
+
+        
         if(_useDefaultDisplay) OnlyDisplayCurrentPage();
         if (!_isOpen && !(isEquippable && alwaysUseHotbar))
         {
