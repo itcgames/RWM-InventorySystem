@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -115,6 +116,26 @@ public class Inventory : MonoBehaviour
             if (stackAmount < _items.Count) return;
         }
         _maxStackAmount = stackAmount;
+    }
+
+    public bool RemoveItem(string name, uint amount)
+    {
+        if (_items == null) return false;
+        List<GameObject> itemToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == name).ToList();
+        if (itemToRemove == null || itemToRemove.Count == 0) return false;
+        int amountInInventory = (int)itemToRemove.Sum(x => x.GetComponent<InventoryItem>().NumberOfItems);
+        if (amountInInventory < amount) return false;
+        while(amount > 0)
+        {
+            itemToRemove[0].GetComponent<InventoryItem>().NumberOfItems--;
+            amount--;
+            if(itemToRemove[0].GetComponent<InventoryItem>().NumberOfItems == 0)
+            {
+                itemToRemove.RemoveAt(0);
+                _items.Remove(_items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name));
+            }
+        }
+        return true;
     }
 
     private void Start()
