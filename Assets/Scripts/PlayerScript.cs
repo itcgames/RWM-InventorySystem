@@ -14,21 +14,41 @@ public class PlayerScript : MonoBehaviour
     float _health;
     float _strength;
     float _block;
+    float _magic;
+    float _sorcery;
     public Text currentIndex;
     public Text currentHealth;
     public Text currentStrength;
     public Text currentBlock;
+    public Text currentMagic;
+    public Text currentSorcery;
+    public Text displayTrading;
+    public Text displayRemoving;
     // Start is called before the first frame update
     void Start()
     {
         _health = 10.0f;
         inventory = GetComponentInChildren<Inventory>();
         currentIndex.enabled = false;
+        displayTrading.gameObject.SetActive(false);
+        displayRemoving.gameObject.SetActive(false);
         for(int i = 0; i < itemsToAdd.Length; ++i)
         {
             itemsToAdd[i] = Instantiate(itemsToAdd[i]);
             itemsToAdd[i].transform.position = new Vector2(1000, 1000);
         }
+    }
+
+    private IEnumerator UpdateTrading()
+    {
+        yield return new WaitForSeconds(2.5f);
+        displayTrading.gameObject.SetActive(false);
+    }
+
+    private IEnumerator UpdateRemoving()
+    {
+        yield return new WaitForSeconds(2.5f);
+        displayRemoving.gameObject.SetActive(false);
     }
 
     public bool Heal(float amount)
@@ -67,6 +87,20 @@ public class PlayerScript : MonoBehaviour
         return true;
     }
 
+    public bool GainMagic(float amount)
+    {
+        _magic += amount;
+        currentMagic.text = "Magic: " + _magic;
+        return true;
+    }
+
+    public bool GainSorcery(float amount)
+    {
+        _sorcery += amount;
+        currentSorcery.text = "sorcery: " + _sorcery;
+        return true;
+    }
+
     public void TradeItem()
     {
         if (inventory.Items == null || inventory.Items.Count == 0) return;
@@ -79,12 +113,38 @@ public class PlayerScript : MonoBehaviour
             rnd = Random.Range(0, items.Count);
             itemToSell = items[rnd].GetComponent<InventoryItem>().Name;
         }
-        inventory.TradeItems(itemToSell, 1, itemToAdd, 1);
+        bool success = inventory.TradeItems(itemToSell, 1, itemToAdd, 1);
+        if(!success)
+        {
+            Destroy(itemToAdd);
+            Debug.LogWarning("Could not trade");
+        }
+        if (!success)
+        {
+            displayTrading.text = "Could not trade item";
+        }
+        else
+        {
+            displayTrading.text = "Traded item";
+        }
+        displayTrading.gameObject.SetActive(true);
+        StartCoroutine(UpdateTrading());
     }
 
     public void RemoveItem()
     {
-
+        if (inventory.Items == null || inventory.Items.Count == 0) return;
+        bool success = inventory.RemoveItem(inventory.Items[0].GetComponent<InventoryItem>().Name, 1);
+        if(!success)
+        {
+            displayRemoving.text = "Could not remove item";
+        }
+        else
+        {
+            displayRemoving.text = "Removed item";
+        }
+        displayRemoving.gameObject.SetActive(true);
+        StartCoroutine(UpdateRemoving());
     }
 
     private void Update()
