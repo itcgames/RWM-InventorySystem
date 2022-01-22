@@ -722,6 +722,72 @@ namespace Tests
         }
         #endregion
 
+        #region add items to equippables
+        [UnityTest]
+        public IEnumerator AddItemToEquippables()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItemToEquippable(item, 1);
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.Items);
+            Assert.AreEqual(inventory.EquippedItems.Count, 1);
+            InventoryItem itemScript = inventory.EquippedItems[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+        }
+
+        #endregion
+
+        #region loading and saving json
+        [UnityTest]
+        public IEnumerator SaveToJsonWithoutSettingInformation()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItemToEquippable(item, 1);
+            inventory.SaveToJson();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.Items);
+            Assert.AreEqual(inventory.EquippedItems.Count, 1);
+            InventoryItem itemScript = inventory.EquippedItems[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            Assert.NotNull(inventory.errorsString);
+            Assert.AreNotEqual("", inventory.errorsString);
+        }
+
+        [UnityTest]
+        public IEnumerator SaveToJsonWithInformation()
+        {
+            // Use the Assert class to test conditions
+            Inventory inventory = new Inventory();
+            inventory.SetMaxStackAmount(1);
+            GameObject item = CreateItem(5, true, "item");
+            inventory.AddItemToEquippable(item, 1);
+            inventory.pathToJson = "json/";
+            inventory.jsonName = "unitTest";
+            inventory.SaveToJson();
+            yield return new WaitForSeconds(0.1f);
+            Assert.IsNull(inventory.Items);
+            Assert.AreEqual(inventory.EquippedItems.Count, 1);
+            InventoryItem itemScript = inventory.EquippedItems[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            Assert.NotNull(inventory.errorsString);
+            Assert.AreEqual("", inventory.errorsString);
+            inventory.jsonToLoadFrom = "unitTest";
+            //quick way to check that the file that was just saved to exists and has no errors is to instantly load from it and check that all of our data is still there
+            inventory.LoadFromJsonFile();
+            Assert.IsNull(inventory.Items);
+            Assert.AreEqual(inventory.EquippedItems.Count, 1);
+            itemScript = inventory.EquippedItems[0].GetComponent<InventoryItem>();
+            Assert.AreEqual(1, itemScript.NumberOfItems);
+            Assert.NotNull(inventory.errorsString);
+        }
+        #endregion
+
         #region helper functions
         private GameObject CreateItem(uint maxItemsPerStack, bool isStackable, string itemName)
         {

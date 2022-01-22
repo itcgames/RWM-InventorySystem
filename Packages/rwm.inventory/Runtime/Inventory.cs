@@ -80,6 +80,7 @@ public class Inventory : MonoBehaviour
     public string pathToLoadJsonFrom;
     public string jsonToLoadFrom;
     public bool alwaysUseHotbar;
+    public string errorsString = "";
 
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
@@ -1278,7 +1279,7 @@ public class Inventory : MonoBehaviour
         {
             if(!File.Exists(Application.persistentDataPath + jsonToLoadFrom + ".json"))
             {
-                Debug.LogError("Tried to load json from persistent path but the file could not be found.");
+                Debug.LogWarning("Tried to load json from persistent path but the file could not be found.");
                 return;
             }
             json = File.ReadAllText(Application.persistentDataPath + jsonToLoadFrom + ".json");
@@ -1288,7 +1289,7 @@ public class Inventory : MonoBehaviour
         {
             if (!File.Exists(pathToLoadJsonFrom + jsonToLoadFrom + ".json"))
             {
-                Debug.LogError("Tried to load json from the provided path but the file could not be found or the directory did not exist.");
+                Debug.LogWarning("Tried to load json from the provided path but the file could not be found or the directory did not exist.");
                 return;
             }
             json = File.ReadAllText(pathToLoadJsonFrom + jsonToLoadFrom + ".json");
@@ -1312,12 +1313,14 @@ public class Inventory : MonoBehaviour
     {
         if(string.IsNullOrEmpty(pathToJson) && !useDefaultLocation)
         {
-            Debug.LogError("No Path Given to where the json should be stored and the default path is not being used.");
+            Debug.LogWarning("No Path Given to where the json should be stored and the default path is not being used.");
+            errorsString = "Not able to save because no path was given and not using default location";
             return;
         }
         if(string.IsNullOrEmpty(jsonName))
         {
-            Debug.LogError("No name given to the json file that should be created. No File has been created.");
+            Debug.LogWarning("No name given to the json file that should be created. No File has been created.");
+            errorsString = "Not able to save because no name was given";
             return;
         }
         InventorySaveData oldData = null;
@@ -1359,7 +1362,7 @@ public class Inventory : MonoBehaviour
 
     private InventorySaveData GetSaveDataForInventory()
     {
-        string errorsString = "";
+        errorsString = "";
         InventorySaveData data = new InventorySaveData();
         data.maxStackAmount = _maxStackAmount;
         data.useDefaultDisplay = _useDefaultDisplay;
@@ -1465,7 +1468,11 @@ public class Inventory : MonoBehaviour
         data.currentEquippablePageNumber = _currentEquippablePageNumber;
         data.maxEquippableStackAmount = _maxEquippableStackAmount;
         data.currentDescriptionOffset = _currentDescriptionOffset;
-        data.currentItemAmount = _currentItemAmount.name;
+        if(_currentItemAmount != null)
+        {
+            data.currentItemAmount = _currentItemAmount.name;
+        }
+
         data.currentAmountOffset = _currentAmountOffset;
         data.items = new List<ItemData>();
         data.usedItems = new List<ItemData>();
@@ -1527,7 +1534,14 @@ public class Inventory : MonoBehaviour
         data.totalNumberOfPages = _totalNumberOfPages;
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
-        data.name = gameObject.name;
+        try
+        {
+            data.name = gameObject.name;
+        }
+        catch(Exception e)
+        {
+            data.name = "inventory";
+        }           
         data.alwaysUseHotbar = alwaysUseHotbar;
         if (!string.IsNullOrEmpty(errorsString))
         {
@@ -1543,7 +1557,7 @@ public class Inventory : MonoBehaviour
 
     private void LoadFromSaveData(InventorySaveData saveData)
     {
-        string errorsString = "";
+        errorsString = "";
         _maxStackAmount = saveData.maxStackAmount;
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;
