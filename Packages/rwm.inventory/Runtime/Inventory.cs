@@ -131,7 +131,11 @@ public class Inventory : MonoBehaviour
             if(itemToRemove.Last().GetComponent<InventoryItem>().NumberOfItems == 0)
             {
                 itemToRemove.RemoveAt(itemToRemove.Count - 1);
-                _items.Remove(_items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name));
+                GameObject itemToDestroy = _items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name);
+                _items.Remove(itemToDestroy);
+                Destroy(itemToDestroy);
+                OnlyDisplayCurrentPage();
+                DisplayEquippableItems();
             }
         }
         return true;
@@ -147,6 +151,7 @@ public class Inventory : MonoBehaviour
 
     public bool TradeItems(string itemToRemove, uint amountToRemove, GameObject itemToAdd, uint amountToAdd)
     {
+        if (_items == null) return false;
         List<GameObject> itemsToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == itemToRemove).ToList();
         bool canRemove = CanRemoveAmountOfItem(amountToRemove, itemsToRemove);
 

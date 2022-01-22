@@ -6,7 +6,7 @@ using UnityEngine.UI;
 public class PlayerScript : MonoBehaviour
 {
     public GameObject[] itemsToAdd;
-    public uint[] numberOfItemsToAdd;
+    public string[] namesOfItems;
     private Inventory inventory;
     private Vector2 speed = new Vector2(5.0f, 5.0f);
     public GameObject prefab;
@@ -24,6 +24,11 @@ public class PlayerScript : MonoBehaviour
         _health = 10.0f;
         inventory = GetComponentInChildren<Inventory>();
         currentIndex.enabled = false;
+        for(int i = 0; i < itemsToAdd.Length; ++i)
+        {
+            itemsToAdd[i] = Instantiate(itemsToAdd[i]);
+            itemsToAdd[i].transform.position = new Vector2(1000, 1000);
+        }
     }
 
     public bool Heal(float amount)
@@ -60,6 +65,26 @@ public class PlayerScript : MonoBehaviour
         _block += amount;
         currentBlock.text = "Block: " + _block;
         return true;
+    }
+
+    public void TradeItem()
+    {
+        if (inventory.Items == null || inventory.Items.Count == 0) return;
+        string itemToSell = "";
+        int rnd = Random.Range(0, itemsToAdd.Length);
+        GameObject itemToAdd = Instantiate(itemsToAdd[rnd]);
+        List<GameObject> items = inventory.Items;
+        if(items != null && items.Count > 0)
+        {
+            rnd = Random.Range(0, items.Count);
+            itemToSell = items[rnd].GetComponent<InventoryItem>().Name;
+        }
+        inventory.TradeItems(itemToSell, 1, itemToAdd, 1);
+    }
+
+    public void RemoveItem()
+    {
+
     }
 
     private void Update()
