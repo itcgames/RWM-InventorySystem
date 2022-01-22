@@ -126,12 +126,33 @@ public class Inventory : MonoBehaviour
         if (!canRemove) return false;
         while (amount > 0)
         {
-            itemToRemove.Last().GetComponent<InventoryItem>().NumberOfItems--;
+            itemToRemove.Last().GetComponent<InventoryItem>().UseItem();
             amount--;
             if(itemToRemove.Last().GetComponent<InventoryItem>().NumberOfItems == 0)
             {
                 itemToRemove.RemoveAt(itemToRemove.Count - 1);
-                _items.Remove(_items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name));
+                GameObject itemToDestroy = _items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name);
+                int index = _items.FindIndex(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name);
+                if (index <= _currentlySelectedIndex)
+                {
+                    _currentlySelectedIndex--;
+                    if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
+                    OnlyDisplayCurrentPage();
+                    DisplayEquippableItems();
+                    int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
+                    if (initialPageIndex >= _items.Count)
+                    {
+                        _currentPageNumber--;
+                        if (_currentPageNumber < 0) _currentPageNumber = 0;
+                        OnlyDisplayCurrentPage();
+                        DisplayEquippableItems();
+                    }
+                }
+                Debug.Log("Removing used item from inventory");
+                _items.Remove(itemToDestroy);
+                Destroy(itemToDestroy);
+                OnlyDisplayCurrentPage();
+                DisplayEquippableItems();
             }
         }
         return true;
@@ -147,6 +168,7 @@ public class Inventory : MonoBehaviour
 
     public bool TradeItems(string itemToRemove, uint amountToRemove, GameObject itemToAdd, uint amountToAdd)
     {
+        if (_items == null) return false;
         List<GameObject> itemsToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == itemToRemove).ToList();
         bool canRemove = CanRemoveAmountOfItem(amountToRemove, itemsToRemove);
 
