@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -79,6 +80,7 @@ public class Inventory : MonoBehaviour
     public string pathToLoadJsonFrom;
     public string jsonToLoadFrom;
     public bool alwaysUseHotbar;
+    public string errorsString = "";
 
     [HideInInspector]
     public uint MaxStackAmount { get => _maxStackAmount; }
@@ -115,6 +117,108 @@ public class Inventory : MonoBehaviour
             if (stackAmount < _items.Count) return;
         }
         _maxStackAmount = stackAmount;
+    }
+
+    public bool RemoveItem(string name, uint amount)
+    {
+        if (_items == null) return false;
+        List<GameObject> itemToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == name).ToList();
+        bool canRemove = CanRemoveAmountOfItem(amount, itemToRemove);
+        if (!canRemove) return false;
+        while (amount > 0)
+        {
+            itemToRemove.Last().GetComponent<InventoryItem>().UseItem();
+            amount--;
+            if(itemToRemove.Last().GetComponent<InventoryItem>().NumberOfItems == 0)
+            {
+                itemToRemove.RemoveAt(itemToRemove.Count - 1);
+                GameObject itemToDestroy = _items.Single(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name);
+                int index = _items.FindIndex(x => x.GetComponent<InventoryItem>().NumberOfItems == 0 && x.GetComponent<InventoryItem>().Name == name);
+                if (index <= _currentlySelectedIndex)
+                {
+                    _currentlySelectedIndex--;
+                    if (_currentlySelectedIndex < 0) _currentlySelectedIndex = 0;
+                    OnlyDisplayCurrentPage();
+                    DisplayEquippableItems();
+                    int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
+                    if (initialPageIndex >= _items.Count)
+                    {
+                        _currentPageNumber--;
+                        if (_currentPageNumber < 0) _currentPageNumber = 0;
+                        OnlyDisplayCurrentPage();
+                        DisplayEquippableItems();
+                    }
+                }
+                Debug.Log("Removing used item from inventory");
+                _items.Remove(itemToDestroy);
+                Destroy(itemToDestroy);
+                OnlyDisplayCurrentPage();
+                DisplayEquippableItems();
+            }
+        }
+        return true;
+    }
+
+    private bool CanRemoveAmountOfItem(uint amount, List<GameObject> itemToRemove)
+    {
+        if (itemToRemove == null || itemToRemove.Count == 0) return false;
+        int amountInInventory = (int)itemToRemove.Sum(x => x.GetComponent<InventoryItem>().NumberOfItems);
+        if (amountInInventory < amount) return false;
+        return true;
+    }
+
+    public bool TradeItems(string itemToRemove, uint amountToRemove, GameObject itemToAdd, uint amountToAdd)
+    {
+        if (_items == null) return false;
+        List<GameObject> itemsToRemove = _items.Where(x => x.GetComponent<InventoryItem>().Name == itemToRemove).ToList();
+        bool canRemove = CanRemoveAmountOfItem(amountToRemove, itemsToRemove);
+
+        if (!canRemove) return false;
+
+        List<int> numberOfItems = new List<int>();
+
+        itemsToRemove.ForEach(x => numberOfItems.Add((int)x.GetComponent<InventoryItem>().NumberOfItems));
+        int amountOfFreedSpaces = GetAmountOfFreedSpacesInInventory(numberOfItems, (int)amountToRemove);
+        int amountOfFreeStacks = (int)(_maxStackAmount - _items.Count) + amountOfFreedSpaces;
+
+        List<GameObject> objectsAlreadyInInventory = _items.Where(x => x.GetComponent<InventoryItem>().Name == itemToAdd.GetComponent<InventoryItem>().Name).ToList();
+        int amountOfStacksToAdd = 0;
+        if(objectsAlreadyInInventory.Count > 0)
+        {
+            GameObject lastItem = objectsAlreadyInInventory.Last();
+            amountOfStacksToAdd = ((int)amountToAdd - (int)lastItem.GetComponent<InventoryItem>().NumberOfItems) / (int)itemToAdd.GetComponent<InventoryItem>().MaxItemsPerStack;
+        }
+        else
+        {
+            amountOfStacksToAdd = (int)amountToAdd / (int)itemToAdd.GetComponent<InventoryItem>().MaxItemsPerStack;
+        }
+        if (amountToAdd < itemToAdd.GetComponent<InventoryItem>().MaxItemsPerStack) amountOfStacksToAdd++;
+
+        if (amountOfStacksToAdd > amountOfFreeStacks) return false;
+        RemoveItem(itemToRemove, amountToRemove);
+        AddItem(itemToAdd, amountToAdd);
+
+        return true;
+    }
+
+    private int GetAmountOfFreedSpacesInInventory(List<int> numberOfItems, int amountToRemove)
+    {
+        int spaces = 0;
+        while(amountToRemove > 0)
+        {
+            numberOfItems[numberOfItems.Count - 1]--;
+            amountToRemove--;
+
+            for(int i = 0; i < numberOfItems.Count; i++)
+            {
+                if(numberOfItems[i] == 0)
+                {
+                    numberOfItems.RemoveAt(i);
+                    spaces++;
+                }
+            }
+        }
+        return spaces;
     }
 
     private void Start()
@@ -851,13 +955,31 @@ public class Inventory : MonoBehaviour
     private void AddNewItemToInventory(GameObject newItem, uint amount, ref List<GameObject> listToAddTo, uint maxAmountOfStacks, bool isEquippable)
     {
         if (1 + listToAddTo.Count > maxAmountOfStacks) return;//don't add to the inventory when it's full
-        newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
-        InventoryItem script = newItem.GetComponent<InventoryItem>();
-        script.Position = initialItemPosition;
-        script.SetUpDisplay();
-        script.SetParentTransform(initialTransform);
-        script.SetCanvasAsParent();
-        listToAddTo.Add(newItem);
+
+        if(amount > newItem.GetComponent<InventoryItem>().MaxItemsPerStack)
+        {
+            newItem.GetComponent<InventoryItem>().NumberOfItems = newItem.GetComponent<InventoryItem>().MaxItemsPerStack;
+            amount -= newItem.GetComponent<InventoryItem>().MaxItemsPerStack;
+            InventoryItem script = newItem.GetComponent<InventoryItem>();
+            script.Position = initialItemPosition;
+            script.SetUpDisplay();
+            script.SetParentTransform(initialTransform);
+            script.SetCanvasAsParent();
+            listToAddTo.Add(newItem);
+            AddUntilNoItemsLeft(newItem, (int)amount, ref listToAddTo, maxAmountOfStacks, isEquippable);
+        }
+        else
+        {
+            newItem.GetComponent<InventoryItem>().NumberOfItems = amount;
+            InventoryItem script = newItem.GetComponent<InventoryItem>();
+            script.Position = initialItemPosition;
+            script.SetUpDisplay();
+            script.SetParentTransform(initialTransform);
+            script.SetCanvasAsParent();
+            listToAddTo.Add(newItem);
+        }
+
+        
         if(_useDefaultDisplay) OnlyDisplayCurrentPage();
         if (!_isOpen && !(isEquippable && alwaysUseHotbar))
         {
@@ -1157,7 +1279,7 @@ public class Inventory : MonoBehaviour
         {
             if(!File.Exists(Application.persistentDataPath + jsonToLoadFrom + ".json"))
             {
-                Debug.LogError("Tried to load json from persistent path but the file could not be found.");
+                Debug.LogWarning("Tried to load json from persistent path but the file could not be found.");
                 return;
             }
             json = File.ReadAllText(Application.persistentDataPath + jsonToLoadFrom + ".json");
@@ -1167,7 +1289,7 @@ public class Inventory : MonoBehaviour
         {
             if (!File.Exists(pathToLoadJsonFrom + jsonToLoadFrom + ".json"))
             {
-                Debug.LogError("Tried to load json from the provided path but the file could not be found or the directory did not exist.");
+                Debug.LogWarning("Tried to load json from the provided path but the file could not be found or the directory did not exist.");
                 return;
             }
             json = File.ReadAllText(pathToLoadJsonFrom + jsonToLoadFrom + ".json");
@@ -1191,12 +1313,14 @@ public class Inventory : MonoBehaviour
     {
         if(string.IsNullOrEmpty(pathToJson) && !useDefaultLocation)
         {
-            Debug.LogError("No Path Given to where the json should be stored and the default path is not being used.");
+            Debug.LogWarning("No Path Given to where the json should be stored and the default path is not being used.");
+            errorsString = "Not able to save because no path was given and not using default location";
             return;
         }
         if(string.IsNullOrEmpty(jsonName))
         {
-            Debug.LogError("No name given to the json file that should be created. No File has been created.");
+            Debug.LogWarning("No name given to the json file that should be created. No File has been created.");
+            errorsString = "Not able to save because no name was given";
             return;
         }
         InventorySaveData oldData = null;
@@ -1238,7 +1362,7 @@ public class Inventory : MonoBehaviour
 
     private InventorySaveData GetSaveDataForInventory()
     {
-        string errorsString = "";
+        errorsString = "";
         InventorySaveData data = new InventorySaveData();
         data.maxStackAmount = _maxStackAmount;
         data.useDefaultDisplay = _useDefaultDisplay;
@@ -1344,7 +1468,11 @@ public class Inventory : MonoBehaviour
         data.currentEquippablePageNumber = _currentEquippablePageNumber;
         data.maxEquippableStackAmount = _maxEquippableStackAmount;
         data.currentDescriptionOffset = _currentDescriptionOffset;
-        data.currentItemAmount = _currentItemAmount.name;
+        if(_currentItemAmount != null)
+        {
+            data.currentItemAmount = _currentItemAmount.name;
+        }
+
         data.currentAmountOffset = _currentAmountOffset;
         data.items = new List<ItemData>();
         data.usedItems = new List<ItemData>();
@@ -1406,7 +1534,14 @@ public class Inventory : MonoBehaviour
         data.totalNumberOfPages = _totalNumberOfPages;
         data.maxItemsPerRow = maxItemsPerRow;
         data.maxRows = maxRows;
-        data.name = gameObject.name;
+        try
+        {
+            data.name = gameObject.name;
+        }
+        catch(Exception e)
+        {
+            data.name = "inventory";
+        }           
         data.alwaysUseHotbar = alwaysUseHotbar;
         if (!string.IsNullOrEmpty(errorsString))
         {
@@ -1422,7 +1557,7 @@ public class Inventory : MonoBehaviour
 
     private void LoadFromSaveData(InventorySaveData saveData)
     {
-        string errorsString = "";
+        errorsString = "";
         _maxStackAmount = saveData.maxStackAmount;
         _useDefaultDisplay = saveData.useDefaultDisplay;
         _displayCurrentItemInfo = saveData.displayCurrentItemInfo;

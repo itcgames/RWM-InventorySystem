@@ -1,0 +1,81 @@
+{
+    "maxStackAmount": 1,
+    "useDefaultDisplay": false,
+    "font": "",
+    "displayCurrentItemInfo": false,
+    "currentItemName": "",
+    "currentNameOffset": {
+        "x": 0.0,
+        "y": 0.0
+    },
+    "currentItemDescription": "",
+    "currentDescriptionOffset": {
+        "x": 0.0,
+        "y": 0.0
+    },
+    "currentItemAmount": "",
+    "currentAmountOffset": {
+        "x": 0.0,
+        "y": 0.0
+    },
+    "items": [],
+    "usedItems": [],
+    "equippedItems": [
+        {
+            "itemTag": "item",
+            "description": "",
+            "displayNumberOfItems": false,
+            "numberOfItems": 1,
+            "maxItemsPerStack": 5,
+            "isStackable": true,
+            "usingDefaultDisplay": false,
+            "sprite": "",
+            "image": "",
+            "row": 0,
+            "col": 0,
+            "canvas": "",
+            "position": {
+                "x": 0.0,
+                "y": 0.0,
+                "z": 0.0
+            },
+            "equippableItem": false
+        }
+    ],
+    "isOpen": false,
+    "openCommand": "not set",
+    "closeCommand": "not set",
+    "submitCommand": "not set",
+    "currentlySelectedIndex": -1,
+    "currentPageNumber": 0,
+    "totalNumberOfPages": 0,
+    "initialItemPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "initialEquippableItemPosition": {
+        "x": 0.0,
+        "y": 0.0,
+        "z": 0.0
+    },
+    "initialTransform": "",
+    "pagesText": "",
+    "totalItemsText": "",
+    "rowOffset": 10,
+    "columnOffset": 10,
+    "maxItemsPerRow": 0,
+    "maxRows": 0,
+    "cursor": "",
+    "spriteLocations": "",
+    "name": "inventory",
+    "currentlySelectedEquippable": 0,
+    "currentEquippablePageNumber": 0,
+    "initialEquippableTransform": "",
+    "equippableCursor": "",
+    "currentEquippableName": "",
+    "currentEquippableDescription": "",
+    "maxEquippableStackAmount": 0,
+    "currentEquippableAmount": "",
+    "alwaysUseHotbar": false
+}
