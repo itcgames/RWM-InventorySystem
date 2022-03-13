@@ -255,9 +255,13 @@ public class Inventory : MonoBehaviour
         }
         if (alwaysUseHotbar && _useDefaultDisplay)
         {
-            _currentEquippableName.gameObject.SetActive(true);
-            _currentEquippableDescription.gameObject.SetActive(true);
-            _currentEquippableAmount.gameObject.SetActive(true);
+            if(_currentEquippableAmount != null && _currentEquippableDescription != null && _currentEquippableName != null)
+            {
+                _currentEquippableName.gameObject.SetActive(true);
+                _currentEquippableDescription.gameObject.SetActive(true);
+                _currentEquippableAmount.gameObject.SetActive(true);
+            }
+            
             if (_equippableItems != null)
             {
                 foreach (GameObject item in _equippableItems)
@@ -266,7 +270,8 @@ public class Inventory : MonoBehaviour
                 }
             }
             equippableCursor.gameObject.SetActive(true);
-            DisplayInfoOnCurrentEquippable();
+            if (_currentEquippableAmount != null && _currentEquippableDescription != null && _currentEquippableName != null)
+                DisplayInfoOnCurrentEquippable();
             DisplayEquippableItems();
         }
 
@@ -641,7 +646,7 @@ public class Inventory : MonoBehaviour
         if(_isOpen)
         {
             int indexOfLastItemOnCurrentPage = ((maxItemsPerRow * maxRows) * (_currentPageNumber + 1)) - 1;
-            if(_items.Count > _currentlySelectedIndex + 1)
+            if( _items != null && _items.Count > 0 &&  _items.Count > _currentlySelectedIndex + 1)
             {
                 if(_currentlySelectedIndex == indexOfLastItemOnCurrentPage && _currentlySelectedIndex < _items.Count - 1)
                 {
@@ -662,7 +667,7 @@ public class Inventory : MonoBehaviour
 
     public void GoToNextEquippable()
     {
-        if (_isOpen || alwaysUseHotbar)
+        if (_isOpen || alwaysUseHotbar && _equippableItems != null && _equippableItems.Count > 0)
         {
             int indexOfLastItemOnCurrentPage = ((maxItemsPerRow * maxRows) * (_currentEquippablePageNumber + 1)) - 1;
             if (_equippableItems.Count > _currentlySelectedEquippable + 1)
@@ -689,7 +694,7 @@ public class Inventory : MonoBehaviour
         if(_isOpen)
         {
             int indexOfFirstItemOnCurrentPage = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
-            if(_currentlySelectedIndex > 0)
+            if(_currentlySelectedIndex > 0 && _items != null && _items.Count > 0)
             {
                 if(_currentlySelectedIndex == indexOfFirstItemOnCurrentPage && _currentlySelectedIndex > 0)
                 {
@@ -713,7 +718,7 @@ public class Inventory : MonoBehaviour
         if (_isOpen || alwaysUseHotbar)
         {
             int indexOfFirstItemOnCurrentPage = 0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber);
-            if (_currentlySelectedEquippable > 0)
+            if (_currentlySelectedEquippable > 0 && _equippableItems != null && _equippableItems.Count > 0)
             {
                 if (_currentlySelectedEquippable == indexOfFirstItemOnCurrentPage && _currentlySelectedEquippable > 0)
                 {
@@ -734,7 +739,7 @@ public class Inventory : MonoBehaviour
 
     public void GoToItemBelow()
     {
-        if(_isOpen && maxItemsPerRow > 0)
+        if(_isOpen && maxItemsPerRow > 0 && _items != null && _items.Count > 0)
         {
             if (_currentlySelectedIndex == -1) _currentlySelectedIndex++;
             if(_items.Count > _currentlySelectedIndex + maxItemsPerRow)
@@ -749,7 +754,7 @@ public class Inventory : MonoBehaviour
 
     public void GoToItemAbove()
     {
-        if(_isOpen && _currentlySelectedIndex >= maxItemsPerRow)
+        if(_isOpen && _currentlySelectedIndex >= maxItemsPerRow && _items != null && _items.Count > 0)
         {
             if(_currentlySelectedIndex - maxItemsPerRow >= 0)
             {
@@ -944,8 +949,10 @@ public class Inventory : MonoBehaviour
             {
                 _totalNumberOfPages = Mathf.FloorToInt((_items.Count - 1) / (maxItemsPerRow * maxRows)) + 1;
                 if (_items.Count == 0) _totalNumberOfPages = 0;
-                pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
-                totalItemsText.text = "Num Items: " + _items.Count;
+                if(pagesText != null)
+                    pagesText.text = "Page " + (_currentPageNumber + 1) + " of " + _totalNumberOfPages + " pages";
+                if(totalItemsText != null)
+                    totalItemsText.text = "Num Items: " + _items.Count;
             }
 
         }
@@ -1248,7 +1255,8 @@ public class Inventory : MonoBehaviour
                 pagesText.gameObject.SetActive(true);
                 totalItemsText.gameObject.SetActive(true);
                 DisplayInfoOnCurrentItem();
-                DisplayInfoOnCurrentEquippable();
+                if (_currentEquippableAmount != null && _currentEquippableDescription != null && _currentEquippableName != null)
+                    DisplayInfoOnCurrentEquippable();
                 OnlyDisplayCurrentPage();
                 DisplayEquippableItems();
             }
@@ -1266,7 +1274,8 @@ public class Inventory : MonoBehaviour
                 }
             }
             equippableCursor.gameObject.SetActive(true);
-            DisplayInfoOnCurrentEquippable();
+            if (_currentEquippableAmount != null && _currentEquippableDescription != null && _currentEquippableName != null)
+                DisplayInfoOnCurrentEquippable();
             DisplayEquippableItems();
         }
     }
