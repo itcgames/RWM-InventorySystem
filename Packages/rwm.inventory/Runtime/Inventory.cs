@@ -149,7 +149,6 @@ public class Inventory : MonoBehaviour
                         DisplayEquippableItems();
                     }
                 }
-                Debug.Log("Removing used item from inventory");
                 _items.Remove(itemToDestroy);
                 Destroy(itemToDestroy);
                 OnlyDisplayCurrentPage();
@@ -380,7 +379,6 @@ public class Inventory : MonoBehaviour
         }
         if (lastPageIndex < 0) return new List<GameObject>();
         int count = (lastPageIndex - initialPageIndex) + 1;
-        Debug.Log("Count: " + count);
         return _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
     }
 
@@ -484,7 +482,6 @@ public class Inventory : MonoBehaviour
             bool wasUsed = true;
             if (item.useFunction != null)
             {
-                Debug.Log("has function");
                 wasUsed = item.useFunction();
             }
             else
@@ -505,7 +502,6 @@ public class Inventory : MonoBehaviour
                     if (index < 0) index = 0;
                     OnlyDisplayCurrentPage();
                     DisplayEquippableItems();
-                    Debug.Log("Removing used item from inventory");
                 }
                 int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * currentPage);
                 if (initialPageIndex >= items.Count)
@@ -530,7 +526,6 @@ public class Inventory : MonoBehaviour
     public void OpenInventory()
     {
         _isOpen = true;
-        Debug.Log("Inventory Opened");
         if (_items != null)
         {
             int initialPageIndex = 0 + ((maxItemsPerRow * maxRows) * _currentPageNumber);
@@ -607,7 +602,6 @@ public class Inventory : MonoBehaviour
     public void CloseInventory()
     {
         _isOpen = false;
-        Debug.Log("Inventory Opened");
         if(_items != null)
         {
             foreach (GameObject obj in _items)
@@ -1060,7 +1054,6 @@ public class Inventory : MonoBehaviour
         }
         if (lastPageIndex < 0) return;
         int count = (lastPageIndex - initialPageIndex) + 1;
-        Debug.Log("Count: " + count);
         List<GameObject> currentPage = _equippableItems.GetRange(0 + ((maxItemsPerRow * maxRows) * _currentEquippablePageNumber), count);
         if (_isOpen || alwaysUseHotbar)
         {
@@ -1087,7 +1080,6 @@ public class Inventory : MonoBehaviour
         int countOnRow = 0;
         foreach (GameObject item in currentPage)
         {
-            Debug.Log(originalPosition);
             item.GetComponent<RectTransform>().anchoredPosition = originalPosition;
             countOnRow++;
             if(countOnRow >= maxItemsPerRow)
